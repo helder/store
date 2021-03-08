@@ -1,6 +1,5 @@
 package helder.store;
 
-import helder.store.Selection.Fields;
 import helder.store.From;
 
 @:structInit 
@@ -60,7 +59,7 @@ class Cursor<Row> {
 		);
 	}
  
-	public function select<T: Selection<Row>>(select: T): Cursor<Fields<T>> {
+	public function select<T>(select: Selection<T>): Cursor<T> {
 		return cast with(this.cursor, c -> c.select = cast select);
 	}
 

@@ -1,10 +1,23 @@
 package helder.store;
 
-#if !macro
-@:genericBuild(helder.store.SelectionFields.build()) 
-#end
-class Fields<T> {}
+import helder.store.Collection.CollectionImpl;
 
-enum Selection<Fields> {
-  FieldsOf<Row>(name: String): Selection<Row>;
+enum SelectionImpl<Fields> {
+  FieldsOf<Row>(name: String): SelectionImpl<Row>;
+}
+
+abstract Selection<T>(SelectionImpl<T>) {
+  public function new(selection: SelectionImpl<T>) 
+    this = selection;
+
+	@:from
+	public static macro function ofAny(expr: haxe.macro.Expr) {
+    #if macro
+    return helder.store.macro.Selection.create(expr);
+    #end
+  }
+
+  public static function fieldsOf<T>(collection: CollectionImpl<T>): Selection<T> {
+    return new Selection(FieldsOf(collection.alias));
+  }
 }

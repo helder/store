@@ -1,12 +1,15 @@
 package test;
 
-import helder.store.Collection;
-
-typedef User = {name: String}
-final db = {
-  User: new Collection<User>('User')
-}
+import test.db.User;
+import test.db.Schema.User;
 
 function main() {
-  trace(db.User.id.greater('test'));
+  final test: User = {name: {given: 'a', last: 'b'}}
+  trace(User.select({
+    id: User.id
+  }).where(
+    User.name.given.is('test')
+      .and(User.id.is('abc'))
+  ));
+  trace(User.id.greater('test'));
 }

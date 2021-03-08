@@ -51,7 +51,20 @@ private function isConstant(e: Expr, value: Any) {
 	}
 }
 
-class Expression<T> {
+@:forward
+abstract Expression<T>(ExpressionImpl<T>) {
+	public function new(expr: Expr)
+		this = new ExpressionImpl<T>(expr);
+
+	@:op(a.b)
+	macro public function getProp(expr: haxe.macro.Expr, property: String) {
+		#if macro
+		return helder.store.macro.Expression.getProp(expr, property);
+		#end
+	}
+}
+
+class ExpressionImpl<T> {
   public final expr: Expr;
 
   public function new(expr: Expr)

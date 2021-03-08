@@ -2,7 +2,21 @@ package helder.store;
 
 import helder.store.From;
 
-class Collection<Row> extends Cursor<Row> {
+@:forward
+abstract Collection<T>(CollectionImpl<T>) {
+	public function new(name: String, ?options: {?alias: String}) {
+		this = new CollectionImpl<T>(name, options);
+	}
+
+	@:op(a.b)
+	macro public function getProp(expr: haxe.macro.Expr, property: String) {
+		#if macro
+		return helder.store.macro.Expression.getProp(expr, property);
+		#end
+	}
+}
+
+class CollectionImpl<Row> extends Cursor<Row> {
 	public var id(get, never): Expression<String>;
 	public var alias(get, never): String;
 
@@ -15,7 +29,7 @@ class Collection<Row> extends Cursor<Row> {
 		});
 	}
 
-	public function get(name: String): Expression<Any> {
+	public function get<T>(name: String): Expression<T> {
 		final path = switch cursor.from {
 			case Column(From.Table(name, alias), column): [if (alias != null) alias else name, column];
 			case Table(name, alias): [if (alias != null) alias else name];
@@ -40,7 +54,7 @@ class Collection<Row> extends Cursor<Row> {
 	}
 
 	public function fields(): Selection<Row> {
-		return Selection.FieldsOf(alias);
+		return Selection.fieldsOf(this);
 	}
 
 	function get_alias(): String {
