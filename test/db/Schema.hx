@@ -2,4 +2,6 @@ package test.db;
 
 import helder.store.Collection;
 
-final User = new Collection<User>('User');
+class Schema {
+  public static final User = new Collection<User>('User');
+}

@@ -1,0 +1,5 @@
+-cp src
+-lib tink_core
+-lib tink_unittest
+-main test.Run
+-D no-deprecation-warnings

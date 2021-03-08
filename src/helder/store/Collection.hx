@@ -1,11 +1,13 @@
 package helder.store;
 
+import helder.store.util.RuntimeProxy;
 import helder.store.From;
 
 @:forward
 abstract Collection<T>(CollectionImpl<T>) {
 	public function new(name: String, ?options: {?alias: String}) {
-		this = new CollectionImpl<T>(name, options);
+		final inst = new CollectionImpl<T>(name, options);
+		this = new RuntimeProxy(inst, inst.get);
 	}
 
 	@:op(a.b)
@@ -36,7 +38,7 @@ class CollectionImpl<Row> extends Cursor<Row> {
 			default: throw 'Cannot field access';
 		}
 		return new Expression(Field(path.concat([name])));
-		// todo:  return new Proxy(expr, exprProxy);
+		// todo: return new Proxy(expr, exprProxy);
 	}
 
 	function get_id(): Expression<String> {

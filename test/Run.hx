@@ -1,15 +1,10 @@
 package test;
 
-import test.db.User;
-import test.db.Schema.User;
+import tink.unit.TestBatch;
+import tink.testrunner.Runner;
 
 function main() {
-  final test: User = {name: {given: 'a', last: 'b'}}
-  trace(User.select({
-    id: User.id
-  }).where(
-    User.name.given.is('test')
-      .and(User.id.is('abc'))
-  ));
-  trace(User.id.greater('test'));
+  Runner.run(TestBatch.make([
+    new TestExpression()
+  ])).handle(Runner.exit);
 }

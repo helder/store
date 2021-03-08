@@ -4,9 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "lix": "^15.10.1"
   },
   "scripts": {
-    "test": "yarn haxe test.hxml"
+    "test": "cross-env ANSICON=true lix run travix"
   }
 }
