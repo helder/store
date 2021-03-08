@@ -1,5 +1,7 @@
 -cp src
 -lib tink_core
 -lib tink_unittest
+-lib tink_anon
+-lib deep_equal
 -main test.Run
 -D no-deprecation-warnings

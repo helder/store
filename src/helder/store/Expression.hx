@@ -26,6 +26,7 @@ enum BinOp {
 	Match;
 	In;
 	NotIn;
+	Concat;
 }
 
 enum Expr {
@@ -41,7 +42,10 @@ enum Expr {
 typedef EV<T> = Either<Expression<T>, T>;
 
 private function toExpr<T>(ev: EV<T>): Expr {
-	return if ((ev is Expr)) (cast ev: Expr) else Value((cast ev: T));
+	return 
+		if (ev is ExpressionImpl) (cast ev).expr
+		else if (ev is Expr) (cast ev: Expr) 
+		else Value((cast ev: T));
 }
 
 private function isConstant(e: Expr, value: Any) {
@@ -61,6 +65,13 @@ abstract Expression<T>(ExpressionImpl<T>) {
 		#if macro
 		return helder.store.macro.Expression.getProp(expr, property);
 		#end
+	}
+	// @:forwardStatics prevents one from importing statics with wildcard...
+	public static function value(value: Any) {
+		return ExpressionImpl.value(value);
+	}
+	public static function field(...path: String) {
+		return ExpressionImpl.field(path.toArray());
 	}
 }
 
@@ -92,7 +103,7 @@ class ExpressionImpl<T> {
 		if (isConstant(a, true)) return new Expression(cast b);
 		if (isConstant(a, false)) return cast this;
 		if (isConstant(b, false)) return new Expression(cast b);
-		return new Expression(BinOp(And, expr, b));
+		return new Expression(BinOp(And, a, b));
 	}
 
 	public function is(that: EV<T>): Expression<Bool> {
@@ -161,5 +172,12 @@ class ExpressionImpl<T> {
 			default:
 				return new Expression(Access(expr, path));
 		}
+	}
+
+	public static function value(value: Any) {
+		return new Expression(Value(value));
+	}
+	public static function field(path: Array<String>) {
+		return new Expression(Field(path));
 	}
 }

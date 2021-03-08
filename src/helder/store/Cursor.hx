@@ -8,8 +8,8 @@ class CursorImpl<Row> {
 	public var from(default, null): From;
 	public var where(default, null): Expression<Bool> = null;
 	public var select(default, null): Selection<Row> = null;
-	public var limit(default, null): Int = null;
-	public var offset(default, null): Int = null;
+	public var limit(default, null): Null<Int> = null;
+	public var offset(default, null): Null<Int> = null;
 	public var orderBy(default, null): Array<OrderBy> = null;
 }
 

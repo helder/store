@@ -1,0 +1,80 @@
+package helder.store;
+
+import helder.store.FormatCursor.FormatCursorContext;
+import helder.store.Expression.BinOp;
+import helder.store.Expression.Expr;
+
+final binOps: Map<BinOp, String> = [
+	Add => '+',
+	Subt => '-',
+	Mult => '*',
+	Mod => '%',
+	Div => '/',
+	Greater => '>',
+	GreaterOrEqual => '>=',
+	Less => '<',
+	LessOrEqual => '<=',
+	Equals => '=',
+	NotEquals => '!=',
+	And => 'and',
+	Or => 'or',
+	Like => 'like',
+	Glob => 'glob',
+	Match => 'match',
+	In => 'in',
+	NotIn => 'not in',
+	Concat => '||'
+];
+
+function escape(value: Any) {
+  return '${value}';
+}
+
+function escapeId(id: String) {
+  return id;
+}
+
+typedef FormatExprContext = FormatCursorContext & {
+  formatCursor: (cursor: Cursor<Any>) -> Statement
+}
+
+function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
+	switch expr {
+		case UnOp(Not, e):
+      return formatExpr(e, ctx).wrap(sql -> '!($sql)');
+    case UnOp(IsNull, e):
+      return formatExpr(e, ctx).wrap(sql -> '$sql is null');
+		case BinOp(op, a, b):
+			return formatExpr(a, ctx).wrap(aSql -> 
+          formatExpr(b, ctx).wrap(bSql -> 
+            switch op {
+              /*case BinOp.NotIn:
+                if (expr.b.$type === ExprType.Field)
+                  b = `(select value from json_each(${b}))`*/
+              default: '($aSql ${binOps[op]} $bSql)';
+            }
+          )
+        );
+		case Value(value):
+			if (value is Bool)
+				return if (value) '1' else '0';
+			if (value is Array)
+				return '(${(cast value: Array<Any>).map(escape).join(', ')})';
+			return 
+        if (ctx.formatInline) escape(value)
+        else new Statement('?', [value]);
+		case Field(path):
+			return ctx.formatField(path);
+		case Call(method, params): // todo: count(*)
+			final params = params.map(e -> formatExpr(e, ctx));
+			final expressions = params.map(stmt -> stmt.sql).join(', ');
+			return new Statement(
+				'${escapeId(method)}($expressions)',
+				Lambda.flatMap(params, stmt -> stmt.params)
+      );
+		case Access(e, field):
+			return formatExpr(e, ctx).wrap(sql -> ctx.formatAccess(sql, field));
+		case Query(cursor):
+      return ctx.formatCursor(cursor).wrap(sql -> '($sql)');
+	}
+}
