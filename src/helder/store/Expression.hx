@@ -57,8 +57,12 @@ private function isConstant(e: Expr, value: Any) {
 
 @:forward
 abstract Expression<T>(ExpressionImpl<T>) {
-	public function new(expr: Expr)
-		this = new ExpressionImpl<T>(expr);
+	public function new(expr: Expr) {
+		final inst = new ExpressionImpl<T>(expr);
+		this = 
+			#if js new helder.store.util.RuntimeProxy(inst, inst.get)
+			#else inst #end;
+	}
 
 	@:op(a.b)
 	macro public function getProp(expr: haxe.macro.Expr, property: String) {
@@ -173,6 +177,14 @@ class ExpressionImpl<T> {
 				return new Expression(Access(expr, path));
 		}
 	}
+
+	#if php
+  @:keep @:phpMagic function __get(name:String) {
+    return php.Global.property_exists(this, name)
+      ? php.Syntax.field(this, name)
+      : get(name);
+  }
+	#end
 
 	public static function value(value: Any) {
 		return new Expression(Value(value));

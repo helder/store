@@ -18,7 +18,7 @@ class FromTools {
     return switch from {
 			case Column(Table(name, alias), _) | Table(name, alias):
         if (alias != null) alias else name;
-			default: throw 'Cannot from join';
+			default: throw 'Cannot source join';
 		}
   }
 }

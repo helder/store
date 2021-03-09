@@ -1,0 +1,4 @@
+# @install: lix --silent download "haxelib:/helder.std#0.0.2" into helder.std/0.0.2/haxelib
+-cp ${HAXE_LIBCACHE}/helder.std/0.0.2/haxelib/src
+-D helder.std=0.0.2
+--macro helder.UseStd.use()

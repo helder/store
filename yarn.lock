@@ -18,6 +18,11 @@ cross-spawn@^7.0.1:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
+helder.std@^4.2.1-0.2.0:
+  version "4.2.1-0.2.0"
+  resolved "https://registry.yarnpkg.com/helder.std/-/helder.std-4.2.1-0.2.0.tgz#6c2535bb7bab8a72cfb488c00cdb6a1a192e2b50"
+  integrity sha512-8KnTVKOtq3UmDhZIWmEjzkFyzVp8m0Fcfh63rw9KgPk6jaxda5Ynr73fC7SZaXsG8xV/M42edZEedCcgUMVeLg==
+
 isexe@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"

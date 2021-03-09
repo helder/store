@@ -1,0 +1,13 @@
+-cp src
+-lib tink_core
+-lib tink_unittest
+-lib tink_anon
+-lib deep_equal
+
+#-lib helder.std
+#-lib genes
+#-D genes.include_extension
+#-D dts
+
+-D analyzer-optimize
+-D no-deprecation-warnings

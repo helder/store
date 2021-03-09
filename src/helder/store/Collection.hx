@@ -1,13 +1,14 @@
 package helder.store;
 
-import helder.store.util.RuntimeProxy;
 import helder.store.From;
 
 @:forward
 abstract Collection<T>(CollectionImpl<T>) {
 	public function new(name: String, ?options: {?alias: String}) {
 		final inst = new CollectionImpl<T>(name, options);
-		this = new RuntimeProxy(inst, inst.get);
+		this = 
+			#if js new helder.store.util.RuntimeProxy(inst, inst.get)
+			#else inst #end;
 	}
 
 	@:op(a.b)
@@ -40,6 +41,14 @@ class CollectionImpl<Row> extends Cursor<Row> {
 		return new Expression(Field(path.concat([name])));
 		// todo: return new Proxy(expr, exprProxy);
 	}
+
+	#if php
+  @:keep @:phpMagic function __get(name:String) {
+    return php.Global.property_exists(this, name)
+      ? php.Syntax.field(this, name)
+      : get(name);
+  }
+	#end
 
 	function get_id(): Expression<String> {
 		return cast get('id');

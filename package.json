@@ -1,6 +1,6 @@
 {
-  "name": "store",
-  "version": "1.0.0",
+  "name": "helder.store",
+  "version": "0.0.0",
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
@@ -9,5 +9,8 @@
   },
   "scripts": {
     "test": "cross-env ANSICON=true lix run travix"
+  },
+  "dependencies": {
+    "helder.std": "4.2.1-0.2.0"
   }
 }
