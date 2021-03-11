@@ -11,7 +11,7 @@ import helder.store.FormatCursor.FormatCursorContext;
 import better_sqlite3.Database;
 import helder.Store;
 
-@:jsRequire('better-sqlite3', 'SqliteError')
+@:jsRequire('better-sqlite3-with-prebuilds', 'SqliteError')
 extern class SqliteError {
   final message: String;
 }
@@ -126,7 +126,7 @@ class BetterSqlite3Store implements Store {
   }
 
   function prepare(query: String): PreparedStatement {
-    // trace(query);
+    trace(query);
     return createOnError(() -> db.prepare(query));
   }
 

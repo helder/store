@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^5.4.1",
-    "better-sqlite3": "^7.1.2",
+    "better-sqlite3-with-prebuilds": "^7.1.4",
     "cross-env": "^7.0.3",
     "dts2hx": "^0.15.3",
     "lix": "^15.10.1"

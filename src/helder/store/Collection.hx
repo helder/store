@@ -3,7 +3,7 @@ package helder.store;
 import helder.store.From;
 
 @:forward
-abstract Collection<T>(CollectionImpl<T>) to CollectionImpl<T> {
+abstract Collection<T:{}>(CollectionImpl<T>) to CollectionImpl<T> {
 	public function new(name: String, ?options: {?alias: String}) {
 		final inst = new CollectionImpl<T>(name, options);
 		this = 
@@ -19,7 +19,7 @@ abstract Collection<T>(CollectionImpl<T>) to CollectionImpl<T> {
 	}
 }
 
-class CollectionImpl<Row> extends Cursor<Row> {
+class CollectionImpl<Row:{}> extends Cursor<Row> {
 	public var id(get, never): Expression<String>;
 	public var alias(get, never): String;
 
@@ -60,7 +60,7 @@ class CollectionImpl<Row> extends Cursor<Row> {
 	public function as(name: String): Collection<Row> {
 		return new Collection<Row>(
 			switch cursor.from {
-				case Table(name, _): name;
+				case Table(name, _) | Column(Table(name, _), _): name;
 				default: throw 'assert';
 			}, 
 			{alias: name}

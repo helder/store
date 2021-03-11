@@ -19,7 +19,7 @@ class Cursor<Row> {
 	public function new(cursor: CursorImpl<Row>)
 		this.cursor = cursor;
 
-	public function leftJoin<T>(that: Collection<Any>, on: Expression<Bool>): Cursor<Row> {
+	public function leftJoin<T>(that: Collection<Dynamic>, on: Expression<Bool>): Cursor<Row> {
 		return with(cursor, c -> 
 			c.from = From.Join(
 				this.cursor.from,
@@ -30,7 +30,7 @@ class Cursor<Row> {
 		);
 	}
 
-	public function innerJoin(that: Collection<Any>, on: Expression<Bool>): Cursor<Row> {
+	public function innerJoin(that: Collection<Dynamic>, on: Expression<Bool>): Cursor<Row> {
 		return with(cursor, c ->
 			c.from = From.Join(
 				this.cursor.from,
