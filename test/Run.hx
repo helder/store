@@ -5,6 +5,7 @@ import tink.testrunner.Runner;
 
 function main() {
   Runner.run(TestBatch.make([
-    new TestExpression()
+    new TestExpression(),
+    new TestStore()
   ])).handle(Runner.exit);
 }

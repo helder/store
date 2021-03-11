@@ -1,10 +1,12 @@
 package helder.store;
 
+import helder.store.From.JoinType;
 import helder.store.FormatExpr.FormatExprContext;
 import helder.store.FormatExpr.formatExpr;
 import tink.Anon.*;
 
 typedef FormatCursorContext = {
+  ?includeSelection: Bool,
   ?formatInline: Bool,
   formatSubject: (selection: String) -> String,
   formatAccess: (on: String, field: String) -> String,
@@ -14,14 +16,29 @@ typedef FormatCursorContext = {
 }
 
 function formatSelection<T>(selection: Selection<T>, ctx: FormatCursorContext): String {
-  return '1';
+  return switch selection {
+    case null: '*';
+    default: '*';
+  }
 }
 
-function formatFrom(from: From, ctx: FormatCursorContext): String {
+private function joinType(t: JoinType) {
+  return switch t {
+    case Left: 'left';
+    case Inner: 'inner';
+  }
+}
+
+function formatFrom(from: From, ctx: FormatExprContext): Statement {
   return switch from {
-    case Table(name, alias): ctx.escapeId(from.source());
-    case Column(_, column): '${ctx.escapeId(from.source())}.${ctx.escapeId(column)}';
-    case Join(a, _, _, _): formatFrom(a, ctx);
+    case Table(name, null): ctx.escapeId(name);
+    case Table(name, alias): '${ctx.escapeId(name)} as ${ctx.escapeId(alias)}';
+    case Column(t, _): formatFrom(t, ctx);
+    case Join(a, b, type, condition):
+      final left = formatFrom(a, ctx);
+      final right = formatFrom(b, ctx);
+      final on = formatExpr(condition, ctx);
+      left + joinType(type) + 'join' + right + 'on' + on;
   }
 }
 
@@ -40,7 +57,10 @@ function formatOrderBy(orderBy: Array<OrderBy>, ctx: FormatExprContext): Stateme
 	return new Statement('order by ${orders.join(', ')}', params);
 }
 
-function formatCursor<Row>(cursor: Cursor<Row>, ctx: FormatCursorContext): Statement {
+private function formatCursor<Row>(
+  cursor: Cursor<Row>, 
+  ctx: FormatCursorContext
+): Statement {
   final c = @:privateAccess cursor.cursor;
   final exprCtx: FormatExprContext = merge(ctx, {
     formatCursor: cursor -> formatCursor(cursor, ctx)
@@ -49,12 +69,22 @@ function formatCursor<Row>(cursor: Cursor<Row>, ctx: FormatCursorContext): State
     'limit ${if (c.limit == null) '0' else ctx.escape(c.limit)}' else '';
   final offset = if (c.offset != null)
     'offset ${ctx.escape(c.offset)}' else '';
-  final selection = ctx.formatSubject(formatSelection(c.select, ctx));
-  final from = formatFrom(c.from, ctx);
+  final selection: Statement = ctx.includeSelection
+    ? ctx.formatSubject(formatSelection(c.select, ctx))
+    : '';
+  final from = formatFrom(c.from, exprCtx);
   final where: Statement = 
     if (c.where != null) formatExpr(c.where.expr, exprCtx)
     else '1';
   final order = formatOrderBy(c.orderBy, exprCtx);
   final sql = selection + 'from' + from + 'where' + where + order + limit + offset;
   return sql;
+}
+
+function formatCursorSelect<Row>(cursor: Cursor<Row>, ctx: FormatCursorContext) {
+  return ('select': Statement) + formatCursor(cursor, merge(ctx, {includeSelection: true}));
+}
+
+function formatCursorDelete<Row>(cursor: Cursor<Row>, ctx: FormatCursorContext) {
+  return ('delete': Statement) + formatCursor(cursor, merge(ctx, {includeSelection: false}));
 }

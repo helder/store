@@ -3,7 +3,7 @@ package helder.store;
 import helder.store.From;
 
 @:forward
-abstract Collection<T>(CollectionImpl<T>) {
+abstract Collection<T>(CollectionImpl<T>) to CollectionImpl<T> {
 	public function new(name: String, ?options: {?alias: String}) {
 		final inst = new CollectionImpl<T>(name, options);
 		this = 
@@ -25,9 +25,12 @@ class CollectionImpl<Row> extends Cursor<Row> {
 
 	public function new(name: String, ?options: {?alias: String}) {
 		super({
-			from: Table(
-				name, 
-				if (options == null) null else options.alias
+			from: Column(
+				Table(
+					name, 
+					if (options == null) null else options.alias
+				),
+				'data'
 			)
 		});
 	}

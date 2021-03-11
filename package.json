@@ -1,14 +1,19 @@
 {
+  "type": "module",
   "name": "helder.store",
   "version": "0.0.0",
   "main": "index.js",
   "license": "MIT",
-  "devDependencies": {
-    "cross-env": "^7.0.3",
-    "lix": "^15.10.1"
-  },
   "scripts": {
+    "postinstall": "lix download",
     "test": "cross-env ANSICON=true lix run travix"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^5.4.1",
+    "better-sqlite3": "^7.1.2",
+    "cross-env": "^7.0.3",
+    "dts2hx": "^0.15.3",
+    "lix": "^15.10.1"
   },
   "dependencies": {
     "helder.std": "4.2.1-0.2.0"

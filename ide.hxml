@@ -3,11 +3,13 @@
 -lib tink_unittest
 -lib tink_anon
 -lib deep_equal
+-lib better_sqlite3
+-lib uuid
 
-#-lib helder.std
-#-lib genes
-#-D genes.include_extension
-#-D dts
+-lib helder.std
+-lib genes
+-D genes.include_extension
+-D dts
 
 -D analyzer-optimize
 -D no-deprecation-warnings

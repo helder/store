@@ -2,7 +2,7 @@ package test;
 
 import helder.store.FormatExpr.FormatExprContext;
 import helder.store.FormatExpr.formatExpr;
-import helder.store.FormatCursor.formatCursor;
+import helder.store.FormatCursor.formatCursorSelect;
 import helder.store.Expression;
 import helder.store.Expression.*;
 
@@ -13,7 +13,7 @@ final ctx: FormatExprContext = {
   formatField: (path) -> '$.' + path.join('.'),
   escape: (value) -> '${value}',
   escapeId: (id) -> id,
-  formatCursor: cursor -> formatCursor(cursor, ctx)
+  formatCursor: cursor -> formatCursorSelect(cursor, ctx)
 }
 
 final f = (expr: Expression<Dynamic>) -> formatExpr(expr.expr, ctx).sql;
