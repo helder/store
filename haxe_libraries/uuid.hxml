@@ -1,0 +1,3 @@
+# @install: lix --silent download "gh://github.com/flashultra/uuid#f8127d2974d15bdc6ec00e8d360a11f43b9532d1" into uuid/2.3.1/github/f8127d2974d15bdc6ec00e8d360a11f43b9532d1
+-cp ${HAXE_LIBCACHE}/uuid/2.3.1/github/f8127d2974d15bdc6ec00e8d360a11f43b9532d1/src
+-D uuid=2.3.1

@@ -1,0 +1,6 @@
+{ 
+  "haxe.configurations": [
+    ["ide.hxml", "-js", "dummy"]
+  ],
+  "haxe.executable": "./node_modules/.bin/haxe.cmd"
+}

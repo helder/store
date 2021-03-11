@@ -14,13 +14,13 @@ class CursorImpl<Row> {
 }
 
 class Cursor<Row> {
-	final cursor: CursorImpl<Row>;
+	public final cursor: CursorImpl<Row>;
 
 	public function new(cursor: CursorImpl<Row>)
 		this.cursor = cursor;
 
 	public function leftJoin<T>(that: Collection<Any>, on: Expression<Bool>): Cursor<Row> {
-		return with(this.cursor, c -> 
+		return with(cursor, c -> 
 			c.from = From.Join(
 				this.cursor.from,
 				that.cursor.from,
@@ -31,7 +31,7 @@ class Cursor<Row> {
 	}
 
 	public function innerJoin(that: Collection<Any>, on: Expression<Bool>): Cursor<Row> {
-		return with(this.cursor, c ->
+		return with(cursor, c ->
 			c.from = From.Join(
 				this.cursor.from,
 				that.cursor.from,
@@ -42,29 +42,31 @@ class Cursor<Row> {
 	}
 
 	public function take(limit: Int): Cursor<Row> {
-		return with(this.cursor, c -> c.limit = limit);
+		return with(cursor, c -> c.limit = limit);
 	}
 
 	public function skip(offset: Int): Cursor<Row> {
-		return with(this.cursor, c -> c.offset = offset);
+		return with(cursor, c -> c.offset = offset);
 	}
 
 	public function first(): Cursor<Row> {
-		return this.take(1);
+		return take(1);
 	}
 
 	public function where(where: Expression<Bool>): Cursor<Row> {
-		return with(this.cursor, c ->
-			c.where = if (this.cursor.where != null) this.cursor.where.and(where) else where
+		return with(cursor, c -> 
+			c.where = 
+				if (c.where != null) c.where.and(where) 
+				else where
 		);
 	}
  
 	public function select<T>(select: Selection<T>): Cursor<T> {
-		return cast with(this.cursor, c -> c.select = cast select);
+		return cast with(cursor, c -> c.select = cast select);
 	}
 
 	public function orderBy(orderBy: Array<OrderBy>) {
-		return with(this.cursor, c -> 
+		return with(cursor, c -> 
 			c.orderBy = 
 				(if (this.cursor.orderBy == null) [] else this.cursor.orderBy).concat(orderBy)
 		);
@@ -72,13 +74,14 @@ class Cursor<Row> {
 }
 
 private inline function with<Row>(cursor: CursorImpl<Row>, mutate: (cursor: CursorImpl<Row>) -> Void) {
-	mutate({
+	final res: CursorImpl<Row> = {
 		from: cursor.from,
 		where: cursor.where,
 		select: cursor.select,
 		limit: cursor.limit,
 		offset: cursor.offset,
 		orderBy: cursor.orderBy
-	});
-	return new Cursor<Row>(cursor);
+	}
+	mutate(res);
+	return new Cursor<Row>(res);
 }

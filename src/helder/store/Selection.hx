@@ -1,13 +1,16 @@
 package helder.store;
 
+import haxe.DynamicAccess;
 import helder.store.Collection.CollectionImpl;
 
-enum SelectionImpl<Fields> {
-  FieldsOf<Row>(name: String): SelectionImpl<Row>;
+enum Select<T> {
+  Expression<T>(e: Expression<T>): Select<T>;
+  FieldsOf<T>(name: String): Select<T>;
+  Fields<T>(fields: DynamicAccess<Expression<Dynamic>>): Select<T>;
 }
 
-abstract Selection<T>(SelectionImpl<T>) {
-  public function new(selection: SelectionImpl<T>) 
+abstract Selection<T>(Select<T>) {
+  public function new(selection: Select<T>) 
     this = selection;
 
 	@:from

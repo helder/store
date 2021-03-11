@@ -1,3 +1,3 @@
 package helder.store;
 
-typedef Document = {id: String};
+typedef Document = {id: String}

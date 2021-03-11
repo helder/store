@@ -3,6 +3,8 @@
 -lib tink_unittest
 -lib tink_anon
 -lib deep_equal
+-lib better_sqlite3
+-lib uuid
 
 #-lib helder.std
 #-lib genes

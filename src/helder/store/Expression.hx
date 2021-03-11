@@ -74,9 +74,81 @@ abstract Expression<T>(ExpressionImpl<T>) {
 	public static function value(value: Any) {
 		return ExpressionImpl.value(value);
 	}
+
 	public static function field(...path: String) {
 		return ExpressionImpl.field(path.toArray());
 	}
+
+	@:op(a in b) static function isIn<T>(a:Expression<T>, b:Expression<Array<T>>):Expression<Bool>
+		return a.isIn(b);
+
+	@:op(a + b) static function add<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>
+		return a.add(b);
+
+	@:op(a - b) static function substract<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>
+		return a.substract(b);
+
+	@:op(a * b) static function multiply<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>
+		return a.multiply(b);
+
+	@:op(a / b) static function divide<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Float>
+		return a.divide(b);
+
+	@:op(a in b) static function isInC<T>(a:Expression<T>, b:Array<T>):Expression<Bool>
+		return a.isIn(b);
+
+	@:op(a == b) static function eq<T>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+		return a.is(b);
+
+	@:op(a != b) static function neq<T>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+		return a.is(b).not();
+
+	@:op(a > b) static function gt<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+		return a.greater(b);
+
+	@:op(a < b) static function lt<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+		return a.less(b);
+
+	@:op(a >= b) static function gte<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+		return a.greaterOrEqual(b);
+
+	@:op(a <= b) static function lte<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+		return a.lessOrEqual(b);
+
+	@:op(!a) static function not(c:Expression<Bool>):Expression<Bool>
+		return c.not();
+
+	@:op(a && b) static function and(a:Expression<Bool>, b:Expression<Bool>):Expression<Bool>
+		return a.and(b);
+
+	@:op(a || b) static function or(a:Expression<Bool>, b:Expression<Bool>):Expression<Bool>
+		return a.or(b);
+
+	@:op(a || b) static function constOr(a:Bool, b:Expression<Bool>):Expression<Bool>
+		return b.or(a);
+
+	@:op(a || b) static function orConst(a:Expression<Bool>, b:Bool):Expression<Bool>
+		return a.or(b);
+
+	@:commutative
+	@:op(a == b) static function eqC<T>(a:Expression<T>, b:T):Expression<Bool>
+		return a.is(b);
+
+	@:commutative
+	@:op(a != b) static function neqC<T>(a:Expression<T>, b:T):Expression<Bool>
+		return a.is(b).not();
+
+	@:op(a > b) static function gtConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
+		return a.greater(b);
+
+	@:op(a < b) static function ltConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
+		return a.less(b);
+
+	@:op(a >= b) static function gteConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
+		return a.greaterOrEqual(b);
+
+	@:op(a <= b) static function lteConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
+		return a.lessOrEqual(b);
 }
 
 class ExpressionImpl<T> {
@@ -123,19 +195,19 @@ class ExpressionImpl<T> {
 	public function isNotIn(that: Either<EV<Array<T>>, Cursor<Any>>): Expression<Bool> {
 		return new Expression(BinOp(NotIn, expr, toExpr(that)));
 	}
-	public function add(that: EV<Float>): Expression<Float> {
+	public function add<T:Float>(that: EV<T>): Expression<T> {
 		return new Expression(BinOp(Add, expr, toExpr(that)));
 	}
-	public function substract(that: EV<Float>): Expression<Float> {
+	public function substract<T:Float>(that: EV<T>): Expression<T> {
 		return new Expression(BinOp(Subt, expr, toExpr(that)));
 	}
-	public function multiply(that: EV<Float>): Expression<Float> {
+	public function multiply<T:Float>(that: EV<T>): Expression<T> {
 		return new Expression(BinOp(Mult, expr, toExpr(that)));
 	}
 	public function remainder(that: EV<Float>): Expression<Float> {
 		return new Expression(BinOp(Mod, expr, toExpr(that)));
 	}
-	public function divide(that: EV<Float>): Expression<Float> {
+	public function divide<T:Float>(that: EV<T>): Expression<Float> {
 		return new Expression(BinOp(Div, expr, toExpr(that)));
 	}
 	public function greater(
