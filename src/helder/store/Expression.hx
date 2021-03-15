@@ -1,5 +1,6 @@
 package helder.store;
 
+import helder.store.OrderBy.OrderDirection;
 import haxe.extern.EitherType in Either;
 
 enum UnOp {
@@ -156,6 +157,12 @@ class ExpressionImpl<T> {
 
   public function new(expr: Expr)
     this.expr = expr;
+
+	public function asc()
+		return {expr: expr, order: OrderDirection.Asc}
+
+	public function desc()
+		return {expr: expr, order: OrderDirection.Desc}
 
 	public function not(): Expression<Bool>
 		return new Expression(UnOp(Not, expr));

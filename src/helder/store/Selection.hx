@@ -27,11 +27,14 @@ abstract Selection<T>(Select<T>) from Select<T> {
   public static function fieldsOf<T:{}>(collection: CollectionImpl<T>): Selection<T> {
     return new Selection(FieldsOf(collection.alias));
   }
-
+  
+	// Extern generic inline is useless, but forces the compiler to close
+  // what is otherwise a constrained monomorph.
+  @:extern @:generic inline
   public static function with<A: {}, B: {}, C: B & A>(a: Selection<A>, b:Selection<B>): Selection<C> {
     return switch a {
       case FieldsOf(name, null): FieldsOf(name, b);
       default: throw 'assert';
-    }
+    };
   }
 }

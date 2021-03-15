@@ -27,6 +27,7 @@ final context: FormatCursorContext = {
   formatSubject: (selection) -> selection,
   formatAccess: (on, field) -> 'json_extract(${on}, \'$.${field}\')',
   formatField: formatField,
+  formatUnwrapArray: sql -> '(select value from json_each($sql))',
   escape: escape,
   escapeId: escapeId
 }
@@ -45,32 +46,32 @@ class SqliteStore implements Store {
     this.db.exec('PRAGMA optimize');
   }
 
-  public function all<Row:{}, R:Row&Document>(cursor: Cursor<Row>): Array<R> {
+  public function all<Row>(cursor: Cursor<Row>): Array<Row> {
     final stmt = formatCursorSelect(cursor, context);
     return prepare(stmt.sql)
       .all(stmt.params)
       .map((col: String) -> haxe.Json.parse(col));
   }
 
-	public function first<Row:{}, R:Row&Document>(cursor: Cursor<Row>): Null<R> {
+	public function first<Row>(cursor: Cursor<Row>): Null<Row> {
     return all(cursor.take(1))[0];
   }
 
-	public function delete<Row:{}>(cursor: Cursor<Row>): {changes: Int} {
+	public function delete<Row>(cursor: Cursor<Row>): {changes: Int} {
     final stmt = formatCursorDelete(cursor, context);
     return prepare(stmt.sql).run(stmt.params);
   }
 
-	public function count<Row:{}>(cursor: Cursor<Row>): Int {
+	public function count<Row>(cursor: Cursor<Row>): Int {
     final stmt = formatCursorSelect(cursor, context);
     return prepare('select count(*) from (${stmt.sql})')
       .get(stmt.params);
   }
   
-	public function insert<Row:{}, R:Row&Document>(
+	public function insert<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
-    objects: Array<Row>
-  ): Array<R> {
+    objects: Array<In>
+  ): Array<Row> {
     final table = escapeId(switch collection.cursor.from {
       case Table(name, _) | Column(Table(name, _), _): name;
       default: throw 'assert';
@@ -86,14 +87,14 @@ class SqliteStore implements Store {
     return cast objects;
   }
 
-	public function insertOne<Row:{}, R: Row & Document>(
+	public function insertOne<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
-    object: Row
-  ): R {
+    object: In
+  ): Row {
     return insert(collection, [object])[0];
   }
 
-	public function save<Row:{}>(collection: Collection<Row>, objects: Array<Row>): Array<Row> {
+	public function save<Row:Document>(collection: Collection<Row>, objects: Array<Row>): Array<Row> {
     /*final update = db.transaction(() -> {
 
     });
@@ -101,7 +102,7 @@ class SqliteStore implements Store {
     return objects;
   }
 
-  public function saveOne<Row:{}>(collection: Collection<Row>, object: Row): Row {
+  public function saveOne<Row:Document>(collection: Collection<Row>, object: Row): Row {
     return save(collection, [object])[0];
   }
 

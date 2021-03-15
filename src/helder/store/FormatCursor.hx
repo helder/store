@@ -13,14 +13,14 @@ typedef FormatCursorContext = {
   formatSubject: (selection: Statement) -> Statement,
   formatAccess: (on: String, field: String) -> String,
   formatField: (path: Array<String>) -> String,
+	formatUnwrapArray: (sql: String) -> String,
   escape: (value: Any) -> String,
   escapeId: (id: String) -> String
 }
 
 function formatSelection<T>(selection: Selection<T>, ctx: FormatExprContext): Statement {
-  trace(selection);
   return switch selection {
-    case null: '*';
+    case null: 'data';
     case Expression(e): formatExpr(e.expr, ctx);
     case FieldsOf(source, with): 
       var target = '${ctx.escapeId(source)}.data';
@@ -34,8 +34,10 @@ function formatSelection<T>(selection: Selection<T>, ctx: FormatExprContext): St
         if (expr is ExpressionImpl) {
           res += formatExpr(expr.expr, ctx).wrap(sql -> '${ctx.escape(key)}, $sql');
         } else if (expr is Cursor) {
-          res += ctx.formatCursor(cast expr).wrap(sql -> '${ctx.escape(key)}, 
-            json((select json_group_array(res) from (select $sql)))
+          res += formatCursor(cast expr, merge(ctx, {
+            formatSubject: (subject) -> subject.wrap(sql -> '$sql as res')
+          })).wrap(sql -> '${ctx.escape(key)}, 
+            (select json_group_array(json(res)) from (select $sql))
           ');
         }
         if (i++ < length - 1) res += ',';

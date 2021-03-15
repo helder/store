@@ -2,7 +2,7 @@ package test;
 
 import helder.store.Collection;
 import helder.store.sqlite.SqliteStore in Store;
-import tink.Anon.*;
+import tink.Anon.merge;
 
 @:asserts
 class TestStore {
@@ -10,7 +10,7 @@ class TestStore {
 
   public function testBasic() {
     final db = new Store();
-    final Node = new Collection<{index: Int}>('node');
+    final Node = new Collection<{id: String, index: Int}>('node');
 	  final amount = 10;
 	  final objects = [for (i in 0 ... amount) {index: i}];
 	  asserts.assert(objects.length == amount);
@@ -27,7 +27,7 @@ class TestStore {
 
   public function testFilters() {
     final db = new Store();
-    final Test = new Collection<{prop: Int}>('test');
+    final Test = new Collection<{id: String, prop: Int}>('test');
     final a = {prop: 10}
     final b = {prop: 20}
     db.insert(Test, [a, b]);
@@ -37,7 +37,7 @@ class TestStore {
 
   public function testLimit() {
     final db = new Store();
-    final Test = new Collection<{prop: Int}>('test');
+    final Test = new Collection<{id: String, prop: Int}>('test');
     final a = {prop: 10}
     db.insert(Test, [a, a, a, a]);
     final two = Test.take(2);
@@ -49,13 +49,13 @@ class TestStore {
 
   public function testStuctures() {
     final db = new Store();
-    final Test = new Collection<{a: Int}>('test');
+    final Test = new Collection<{id: String, a: Int}>('test');
     db.insertOne(Test, {a: 25});
     asserts.assert(db.first(Test.where(Test.a in [25])).a == 25);
     asserts.assert(db.first(Test.where(
       Test.a.isNotIn([1, 1])
     )).a == 25);
-    final Structure = new Collection<{deep: {structure: Int}}>('structure');
+    final Structure = new Collection<{id: String, deep: {structure: Int}}>('structure');
     db.insertOne(Structure, {deep: {structure: 1}});
     asserts.assert(
       db.first(Structure.where(Structure.deep.structure == 0))
@@ -70,19 +70,19 @@ class TestStore {
 
   public function testIncludeMany() {
     final db = new Store();
-    final Role = new Collection<{name: String}>('Role');
-    final role1 = db.insertOne(Role, {name: ('role1')});
-    final role2 = db.insertOne(Role, {name: ('role2')});
-    final User = new Collection<{roles: Array<String>}>('User');
+    final Role = new Collection<{id: String, name: String}>('Role');
+    final role1 = db.insertOne(Role, {name: 'role1'});
+    final role2 = db.insertOne(Role, {name: 'role2'});
+    final User = new Collection<{id: String, roles: Array<String>}>('User');
     final user = db.insertOne(User, {roles: [role1.id, role2.id]});
     final UserAlias = User.as('user1');
     final RoleAlias = Role.as('role');
     final bundled = db.first(
       UserAlias.select(
-        UserAlias.fields().with({
+        UserAlias.fields.with({
           roles: RoleAlias.where(RoleAlias.id.isIn(UserAlias.roles)).select({
             name: RoleAlias.name
-          })
+          }).orderBy([RoleAlias.name.asc()])
         })
       )
     );
@@ -90,22 +90,19 @@ class TestStore {
       [{name: 'role1'}, {name: 'role2'}],
       bundled.roles
     );
-    /*
-    final entry = db.insertOne(Test, {type: 'entry'});
-    final language = db.insertOne(Test, {type: 'language', entry: entry.id});
-    final version1 = db.insertOne(Test, {
-      type: 'version1',
+    final Entry = new Collection<{id: String}>('Entry');
+    final Language = new Collection<{id: String, entry: String}>('Language');
+    final Version = new Collection<{id: String, language: String}>('Version');
+    final entry = db.insertOne(Entry, {});
+    final language = db.insertOne(Language, {entry: entry.id});
+    final version1 = db.insertOne(Version, {
       language: language.id
     });
-    final version2 = db.insertOne(Test, {
-      type: 'version2',
+    final version2 = db.insertOne(Version, {
       language: language.id
     });
-    final Entry = Test.as('entry');
-    final Language = Test.as('language');
-    final Version = Test.as('version');
-    final page = db.sure(
-      Entry.where(Entry.type.is('entry')).select(
+    final page = db.first(
+      Entry.select(
         Entry.fields.with({
           languages: Language.where(Language.entry.is(Entry.id)).select(
             Language.fields.with({
@@ -115,9 +112,13 @@ class TestStore {
         })
       )
     );
-    asserts.compare(page, entry.merge({
-      languages: [{versions: [version1, version2]}]
-    }));*/
+    asserts.compare(merge(entry, {
+      languages: [
+        merge(language, {
+          versions: [version1, version2]
+        })
+      ]
+    }), page);
     return asserts.done();
   }
 }

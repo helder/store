@@ -48,9 +48,8 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
 			return formatExpr(a, ctx).wrap(aSql -> 
           formatExpr(b, ctx).wrap(bSql -> 
             switch op {
-              /*case BinOp.NotIn:
-                if (expr.b.$type === ExprType.Field)
-                  b = `(select value from json_each(${b}))`*/
+							case In | NotIn if (b.match(Expr.Field(_))):
+                '($aSql ${binOps[op]} ${ctx.formatUnwrapArray(bSql)})';
               default: '($aSql ${binOps[op]} $bSql)';
             }
           )

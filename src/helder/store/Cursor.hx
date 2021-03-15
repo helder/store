@@ -60,7 +60,7 @@ class Cursor<Row> {
 				else where
 		);
 	}
- 
+	
 	public function select<T>(select: Selection<T>): Cursor<T> {
 		return cast with(cursor, c -> c.select = cast select);
 	}

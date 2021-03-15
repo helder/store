@@ -5,6 +5,7 @@
 -lib deep_equal
 -lib better_sqlite3
 -lib uuid
+-dce full
 
 #-lib helder.std
 #-lib genes

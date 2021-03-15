@@ -10,6 +10,7 @@ final ctx: FormatExprContext = {
   formatInline: true,
   formatSubject: selection -> selection,
   formatAccess: (on, field) -> '${on}.${field}',
+  formatUnwrapArray: sql -> sql,
   formatField: (path) -> '$.' + path.join('.'),
   escape: (value) -> '${value}',
   escapeId: (id) -> id,
@@ -23,15 +24,15 @@ class TestExpression {
   public function new() {}
 
   public function testBasic() {
-    asserts.assert(f(value(1).is(1)) == '(1 = 1)');
-    asserts.assert(f(field('a').is(1)) == '($.a = 1)');
+    asserts.assert(f(value(1) == 1) == '(1 = 1)');
+    asserts.assert(f(field('a') == 1) == '($.a = 1)');
     asserts.assert(
-      f(field('a').is(1).and(field('b').is(2))) == '(($.a = 1) and ($.b = 2))'
+      f(field('a') == 1 && field('b') == 2) == '(($.a = 1) and ($.b = 2))'
     );
     return asserts.done();
   }
 
   public function testPath() {
-    return assert(f(field('a.b').is(1)) == '($.a.b = 1)');
+    return assert(f(field('a.b') == 1) == '($.a.b = 1)');
   }
 }

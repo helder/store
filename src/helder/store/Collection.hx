@@ -22,6 +22,7 @@ abstract Collection<T:{}>(CollectionImpl<T>) to CollectionImpl<T> {
 class CollectionImpl<Row:{}> extends Cursor<Row> {
 	public var id(get, never): Expression<String>;
 	public var alias(get, never): String;
+	public var fields(get, never): Selection<Row>;
 
 	public function new(name: String, ?options: {?alias: String}) {
 		super({
@@ -67,7 +68,7 @@ class CollectionImpl<Row:{}> extends Cursor<Row> {
 		);
 	}
 
-	public function fields(): Selection<Row> {
+	function get_fields(): Selection<Row> {
 		return Selection.fieldsOf(this);
 	}
 
