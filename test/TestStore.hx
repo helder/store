@@ -1,7 +1,8 @@
 package test;
 
 import helder.store.Collection;
-import helder.store.sqlite.SqliteStore as Store;
+import helder.store.sqlite.SqliteStore in Store;
+import tink.Anon.*;
 
 @:asserts
 class TestStore {
@@ -16,11 +17,10 @@ class TestStore {
 	  final stored = db.insert(Node, objects);
 	  asserts.assert(db.count(Node) == amount);
 	  final id = stored[amount - 1].id;
-    final last = db.first(
-      Node.where(Node.index >= amount - 1 && Node.index < amount)
-    );
     asserts.assert(
-      last.id == id
+      db.first(
+        Node.where(Node.index >= amount - 1 && Node.index < amount)
+      ).id == id
     );
     return asserts.done();
   }
@@ -65,6 +65,59 @@ class TestStore {
       db.first(Structure.where(Structure.deep.structure == 1))
       != null
     );
+    return asserts.done();
+  }
+
+  public function testIncludeMany() {
+    final db = new Store();
+    final Role = new Collection<{name: String}>('Role');
+    final role1 = db.insertOne(Role, {name: ('role1')});
+    final role2 = db.insertOne(Role, {name: ('role2')});
+    final User = new Collection<{roles: Array<String>}>('User');
+    final user = db.insertOne(User, {roles: [role1.id, role2.id]});
+    final UserAlias = User.as('user1');
+    final RoleAlias = Role.as('role');
+    final bundled = db.first(
+      UserAlias.select(
+        UserAlias.fields().with({
+          roles: RoleAlias.where(RoleAlias.id.isIn(UserAlias.roles)).select({
+            name: RoleAlias.name
+          })
+        })
+      )
+    );
+    asserts.compare( 
+      [{name: 'role1'}, {name: 'role2'}],
+      bundled.roles
+    );
+    /*
+    final entry = db.insertOne(Test, {type: 'entry'});
+    final language = db.insertOne(Test, {type: 'language', entry: entry.id});
+    final version1 = db.insertOne(Test, {
+      type: 'version1',
+      language: language.id
+    });
+    final version2 = db.insertOne(Test, {
+      type: 'version2',
+      language: language.id
+    });
+    final Entry = Test.as('entry');
+    final Language = Test.as('language');
+    final Version = Test.as('version');
+    final page = db.sure(
+      Entry.where(Entry.type.is('entry')).select(
+        Entry.fields.with({
+          languages: Language.where(Language.entry.is(Entry.id)).select(
+            Language.fields.with({
+              versions: Version.where(Version.language.is(Language.id))
+            })
+          )
+        })
+      )
+    );
+    asserts.compare(page, entry.merge({
+      languages: [{versions: [version1, version2]}]
+    }));*/
     return asserts.done();
   }
 }

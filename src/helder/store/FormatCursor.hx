@@ -3,22 +3,44 @@ package helder.store;
 import helder.store.From.JoinType;
 import helder.store.FormatExpr.FormatExprContext;
 import helder.store.FormatExpr.formatExpr;
+import helder.store.Expression.ExpressionImpl;
+import helder.store.Cursor;
 import tink.Anon.*;
 
 typedef FormatCursorContext = {
   ?includeSelection: Bool,
   ?formatInline: Bool,
-  formatSubject: (selection: String) -> String,
+  formatSubject: (selection: Statement) -> Statement,
   formatAccess: (on: String, field: String) -> String,
   formatField: (path: Array<String>) -> String,
   escape: (value: Any) -> String,
   escapeId: (id: String) -> String
 }
 
-function formatSelection<T>(selection: Selection<T>, ctx: FormatCursorContext): String {
+function formatSelection<T>(selection: Selection<T>, ctx: FormatExprContext): Statement {
+  trace(selection);
   return switch selection {
     case null: '*';
-    default: '*';
+    case Expression(e): formatExpr(e.expr, ctx);
+    case FieldsOf(source, with): 
+      var target = '${ctx.escapeId(source)}.data';
+      if (with == null) target;
+      else formatSelection(with, ctx).wrap(sql -> 'json_patch($target, $sql)');
+    case Fields(fields):
+      var res: Statement = '';
+      var i = 0;
+      var length = fields.keys().length;
+      for (key => expr in fields) {
+        if (expr is ExpressionImpl) {
+          res += formatExpr(expr.expr, ctx).wrap(sql -> '${ctx.escape(key)}, $sql');
+        } else if (expr is Cursor) {
+          res += ctx.formatCursor(cast expr).wrap(sql -> '${ctx.escape(key)}, 
+            json((select json_group_array(res) from (select $sql)))
+          ');
+        }
+        if (i++ < length - 1) res += ',';
+      }
+      res.wrap(sql -> 'json_object($sql)');
   }
 }
 
@@ -70,7 +92,7 @@ private function formatCursor<Row>(
   final offset = if (c.offset != null)
     'offset ${ctx.escape(c.offset)}' else '';
   final selection: Statement = ctx.includeSelection
-    ? ctx.formatSubject(formatSelection(c.select, ctx))
+    ? ctx.formatSubject(formatSelection(c.select, exprCtx))
     : '';
   final from = formatFrom(c.from, exprCtx);
   final where: Statement = 
