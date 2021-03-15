@@ -1,6 +1,7 @@
 { 
   "haxe.configurations": [
-    ["ide.hxml", "-js", "dummy"]
+    ["ide.hxml", "-js", "js", "--no-output"],
+    ["ide.hxml", "-php", "php", "--no-output"]
   ],
   "haxe.executable": "./node_modules/.bin/haxe.cmd"
 }
