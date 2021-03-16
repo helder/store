@@ -13,12 +13,12 @@ class TestStore {
   public function testBasic() {
     final db = new Store();
     final Node = new Collection<{id: String, index: Int}>('node');
-	  final amount = 10;
-	  final objects = [for (i in 0 ... amount) {index: i}];
-	  asserts.assert(objects.length == amount);
-	  final stored = db.insert(Node, objects);
-	  asserts.assert(db.count(Node) == amount);
-	  final id = stored[amount - 1].id;
+    final amount = 10;
+    final objects = [for (i in 0 ... amount) {index: i}];
+    asserts.assert(objects.length == amount);
+    final stored = db.insert(Node, objects);
+    asserts.assert(db.count(Node) == amount);
+    final id = stored[amount - 1].id;
     asserts.assert(
       db.first(
         Node.where(Node.index >= amount - 1 && Node.index < amount)
@@ -125,30 +125,30 @@ class TestStore {
   }
 
   public function testFunctions() {
-  final store = new Store();
-  final User = new Collection<{id: String, birthdate: String}>('User');
-  final now = '1920-01-01';
-  final age: Expression<Int> = 
-    Functions.strftime('%Y', now)
-    .substract(
-      Functions.castAs(
-        Functions.strftime('%Y', User.birthdate), 
-        'integer'
+    final store = new Store();
+    final User = new Collection<{id: String, birthdate: String}>('User');
+    final now = '1920-01-01';
+    final age: Expression<Int> = 
+      Functions.strftime('%Y', now)
+      .substract(
+        Functions.castAs(
+          Functions.strftime('%Y', User.birthdate), 
+          'integer'
+        )
       )
-    )
-    .substract(
-      Functions.castAs(
-        Functions.strftime('%m-%d', now).less(
-          Functions.strftime('%m-%d', User.birthdate)
-        ), 
-        'integer'
-      )
+      .substract(
+        Functions.castAs(
+          Functions.strftime('%m-%d', now).less(
+            Functions.strftime('%m-%d', User.birthdate)
+          ), 
+          'integer'
+        )
+      );
+    final me = store.insertOne(User, {birthdate: '1900-01-01'});
+    return assert(
+      store.first(User.select({age: age}).where(User.id.is(me.id))).age
+      ==
+      20
     );
-  final me = store.insertOne(User, {birthdate: '1900-01-01'});
-  return assert(
-    store.first(User.select({age: age}).where(User.id.is(me.id))).age
-    ==
-    20
-  );
   }
 }
