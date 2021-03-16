@@ -42,7 +42,7 @@ enum Expr {
 
 typedef EV<T> = Either<Expression<T>, T>;
 
-private function toExpr<T>(ev: EV<T>): Expr {
+function toExpr<T>(ev: EV<T>): Expr {
 	return 
 		if (ev is ExpressionImpl) (cast ev).expr
 		else if (ev is Expr) (cast ev: Expr) 

@@ -64,7 +64,13 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
         else new Statement('?', [value]);
 		case Field(path):
 			return ctx.formatField(path);
-		case Call(method, params): // todo: count(*)
+		case Call('cast', [e, Value(type)]):
+			final stmt = formatExpr(e, ctx);
+			return new Statement(
+				'cast(${stmt.sql} as ${ctx.escape(type)})',
+				stmt.params
+      );
+		case Call(method, params):
 			final params = params.map(e -> formatExpr(e, ctx));
 			final expressions = params.map(stmt -> stmt.sql).join(', ');
 			return new Statement(

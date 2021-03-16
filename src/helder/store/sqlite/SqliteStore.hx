@@ -111,7 +111,6 @@ class SqliteStore implements Store {
   }
 
   function prepare(query: String): SqliteStatement {
-    // trace(query);
     return createOnError(() -> db.prepare(query));
   }
 
