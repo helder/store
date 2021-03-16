@@ -16,8 +16,8 @@ abstract Selection<T>(Select<T>) from Select<T> {
   public function new(selection: Select<T>) 
     this = selection;
 
-	@:from
-	public static macro function ofAny(expr: haxe.macro.Expr) {
+  @:from
+  public static macro function ofAny(expr: haxe.macro.Expr) {
     #if macro
     return helder.store.macro.Selection.create(expr);
     #end
@@ -28,7 +28,7 @@ abstract Selection<T>(Select<T>) from Select<T> {
     return new Selection(FieldsOf(collection.alias));
   }
   
-	// Extern generic inline is useless, but forces the compiler to close
+  // Extern generic inline is useless, but forces the compiler to close
   // what is otherwise a constrained monomorph.
   @:extern @:generic inline
   public static function with<A: {}, B: {}, C: B & A>(a: Selection<A>, b:Selection<B>): Selection<C> {

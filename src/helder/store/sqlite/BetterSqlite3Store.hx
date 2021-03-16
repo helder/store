@@ -66,24 +66,24 @@ class BetterSqlite3Store implements Store {
       .map((col: String) -> haxe.Json.parse(col));
   }
 
-	public function first<Row:{}, R:Row&Document>(cursor: Cursor<Row>): Null<R> {
+  public function first<Row:{}, R:Row&Document>(cursor: Cursor<Row>): Null<R> {
     return all(cursor.take(1))[0];
   }
 
-	public function delete<Row:{}>(cursor: Cursor<Row>): {changes: Int} {
+  public function delete<Row:{}>(cursor: Cursor<Row>): {changes: Int} {
     final stmt = formatCursorDelete(cursor, context);
     final prepared = prepare(stmt.sql);
     return prepared.run(...stmt.params);
   }
 
-	public function count<Row:{}>(cursor: Cursor<Row>): Int {
+  public function count<Row:{}>(cursor: Cursor<Row>): Int {
     final stmt = formatCursorSelect(cursor, context);
     return prepare('select count(*) from (${stmt.sql})')
       .pluck(true)
       .get(...stmt.params);
   }
   
-	public function insert<Row:{}, R:Row&Document>(
+  public function insert<Row:{}, R:Row&Document>(
     collection: Collection<Row>, 
     objects: Array<Row>
   ): Array<R> {
@@ -102,14 +102,14 @@ class BetterSqlite3Store implements Store {
     return cast objects;
   }
 
-	public function insertOne<Row:{}, R: Row & Document>(
+  public function insertOne<Row:{}, R: Row & Document>(
     collection: Collection<Row>, 
     object: Row
   ): R {
     return insert(collection, [object])[0];
   }
 
-	public function save<Row:{}>(collection: Collection<Row>, objects: Array<Row>): Array<Row> {
+  public function save<Row:{}>(collection: Collection<Row>, objects: Array<Row>): Array<Row> {
     final update = db.transaction(() -> {
 
     });
@@ -150,10 +150,10 @@ class BetterSqlite3Store implements Store {
 
   function createTable(name: String) {
     db.exec('
-			create table if not exists ${escapeId(name)}(data json);
-			create index if not exists 
+      create table if not exists ${escapeId(name)}(data json);
+      create index if not exists 
         ${escape([name, 'id'].join('.'))} 
         on ${escapeId(name)}(json_extract(data, \'$.id\'));
-		');
+    ');
   }
 }

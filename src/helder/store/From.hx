@@ -16,9 +16,9 @@ enum JoinType {
 class FromTools {
   public static function source(from: From): String {
     return switch from {
-			case Column(Table(name, alias), _) | Table(name, alias):
+      case Column(Table(name, alias), _) | Table(name, alias):
         if (alias != null) alias else name;
-			default: throw 'Cannot source join';
-		}
+      default: throw 'Cannot source join';
+    }
   }
 }

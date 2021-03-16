@@ -53,22 +53,22 @@ class SqliteStore implements Store {
       .map((col: String) -> haxe.Json.parse(col));
   }
 
-	public function first<Row>(cursor: Cursor<Row>): Null<Row> {
+  public function first<Row>(cursor: Cursor<Row>): Null<Row> {
     return all(cursor.take(1))[0];
   }
 
-	public function delete<Row>(cursor: Cursor<Row>): {changes: Int} {
+  public function delete<Row>(cursor: Cursor<Row>): {changes: Int} {
     final stmt = formatCursorDelete(cursor, context);
     return prepare(stmt.sql).run(stmt.params);
   }
 
-	public function count<Row>(cursor: Cursor<Row>): Int {
+  public function count<Row>(cursor: Cursor<Row>): Int {
     final stmt = formatCursorSelect(cursor, context);
     return prepare('select count(*) from (${stmt.sql})')
       .get(stmt.params);
   }
   
-	public function insert<Row:Document, In:{?id: String} & Row>(
+  public function insert<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
     objects: Array<In>
   ): Array<Row> {
@@ -87,14 +87,14 @@ class SqliteStore implements Store {
     return cast objects;
   }
 
-	public function insertOne<Row:Document, In:{?id: String} & Row>(
+  public function insertOne<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
     object: In
   ): Row {
     return insert(collection, [object])[0];
   }
 
-	public function save<Row:Document>(collection: Collection<Row>, objects: Array<Row>): Array<Row> {
+  public function save<Row:Document>(collection: Collection<Row>, objects: Array<Row>): Array<Row> {
     /*final update = db.transaction(() -> {
 
     });
@@ -135,10 +135,10 @@ class SqliteStore implements Store {
 
   function createTable(name: String) {
     db.exec('
-			create table if not exists ${escapeId(name)}(data json);
-			create index if not exists 
+      create table if not exists ${escapeId(name)}(data json);
+      create index if not exists 
         ${escape([name, 'id'].join('.'))} 
         on ${escapeId(name)}(json_extract(data, \'$.id\'));
-		');
+    ');
   }
 }

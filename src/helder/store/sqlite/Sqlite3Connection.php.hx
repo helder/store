@@ -11,7 +11,7 @@ class Sqlite3Connection implements SqliteConnection {
   final db: SQLite3;
   public function new(file: String = ':memory:', ?options: SqliteConnectionOptions) {
     db = new SQLite3(file);
-		db.enableExceptions(true);
+    db.enableExceptions(true);
   }
   public function exec(sql: String)
     db.exec(sql);

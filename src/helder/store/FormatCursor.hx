@@ -13,7 +13,7 @@ typedef FormatCursorContext = {
   formatSubject: (selection: Statement) -> Statement,
   formatAccess: (on: String, field: String) -> String,
   formatField: (path: Array<String>) -> String,
-	formatUnwrapArray: (sql: String) -> String,
+  formatUnwrapArray: (sql: String) -> String,
   escape: (value: Any) -> String,
   escapeId: (id: String) -> String
 }
@@ -67,18 +67,18 @@ function formatFrom(from: From, ctx: FormatExprContext): Statement {
 }
 
 function formatOrderBy(orderBy: Array<OrderBy>, ctx: FormatExprContext): Statement {
-	if (orderBy == null || orderBy.length == 0) return '';
-	var orders = [];
-	var params = [];
-	for (o in orderBy) {
-		final stmt = formatExpr(o.expr, ctx);
+  if (orderBy == null || orderBy.length == 0) return '';
+  var orders = [];
+  var params = [];
+  for (o in orderBy) {
+    final stmt = formatExpr(o.expr, ctx);
     orders.push('${stmt.sql} ${switch o.order {
       case Asc: 'asc';
       case Desc: 'desc';
     }}');
     params = params.concat(stmt.params);
-	}
-	return new Statement('order by ${orders.join(', ')}', params);
+  }
+  return new Statement('order by ${orders.join(', ')}', params);
 }
 
 private function formatCursor<Row>(
@@ -89,7 +89,7 @@ private function formatCursor<Row>(
   final exprCtx: FormatExprContext = merge(ctx, {
     formatCursor: cursor -> formatCursor(cursor, ctx)
   });
-	final limit = if (c.limit != null || c.offset != null)
+  final limit = if (c.limit != null || c.offset != null)
     'limit ${if (c.limit == null) '0' else ctx.escape(c.limit)}' else '';
   final offset = if (c.offset != null)
     'offset ${ctx.escape(c.offset)}' else '';
