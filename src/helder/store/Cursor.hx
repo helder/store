@@ -49,8 +49,8 @@ class Cursor<Row> {
     return with(cursor, c -> c.offset = offset);
   }
 
-  public function first(): Cursor<Row> {
-    return take(1);
+  public function first(): CursorSingleRow<Row> {
+    return new CursorSingleRow(take(1).cursor);
   }
 
   public function where(where: Expression<Bool>): Cursor<Row> {
@@ -72,6 +72,8 @@ class Cursor<Row> {
     );
   }
 }
+
+class CursorSingleRow<Row> extends Cursor<Row> {}
 
 private inline function with<Row>(cursor: CursorImpl<Row>, mutate: (cursor: CursorImpl<Row>) -> Void) {
   final res: CursorImpl<Row> = {

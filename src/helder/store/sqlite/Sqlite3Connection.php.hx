@@ -1,7 +1,5 @@
 package helder.store.sqlite;
 
-import php.Global.*;
-import php.Lib;
 import helder.store.sqlite.SqliteConnection;
 import php.db.SQLite3;
 import php.db.SQLite3Stmt;
@@ -40,9 +38,15 @@ private class Statement {
   }
   public function all<T>(params: Array<Dynamic>): Array<T> {
     for (i in 0 ... params.length) stmt.bindValue(i + 1, params[i]);
-    final res = stmt.execute().fetchArray(2);
-    if (res == false) return [];
-    return cast Lib.toHaxeArray(array_values(res));
+    final res = [];
+    final resultSet = stmt.execute();
+    while (true) {
+      final row = resultSet.fetchArray(2);
+      if (row == false) break;
+      res.push((row: Dynamic)[0]);
+    }
+    resultSet.finalize();
+    return cast res;
   }
   public function run<T>(params: Array<Dynamic>): {changes: Int} {
     for (i in 0 ... params.length) stmt.bindValue(i + 1, params[i]);

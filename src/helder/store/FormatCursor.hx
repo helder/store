@@ -20,26 +20,30 @@ typedef FormatCursorContext = {
 
 function formatSelection<T>(selection: Selection<T>, ctx: FormatExprContext): Statement {
   return switch selection {
-    case null: 'data';
+    case null: '`data`';
+    case Cursor(cursor) if (cursor is CursorSingleRow):
+      formatCursor(cursor, ctx).wrap(sql -> 
+        '(select $sql)'
+      );
+    case Cursor(cursor):
+      formatCursor(cursor, merge(ctx, {
+        formatSubject: (subject) -> subject.wrap(sql -> '$sql as res')
+      })).wrap(sql -> 
+        '(select json_group_array(json(res)) from (select $sql))'
+      );
     case Expression(e): formatExpr(e.expr, ctx);
     case FieldsOf(source, with): 
-      var target = '${ctx.escapeId(source)}.data';
+      var target = 'json(${ctx.escapeId(source)}.`data`)';
       if (with == null) target;
       else formatSelection(with, ctx).wrap(sql -> 'json_patch($target, $sql)');
     case Fields(fields):
       var res: Statement = '';
       var i = 0;
       var length = fields.keys().length;
-      for (key => expr in fields) {
-        if (expr is ExpressionImpl) {
-          res += formatExpr(expr.expr, ctx).wrap(sql -> '${ctx.escape(key)}, $sql');
-        } else if (expr is Cursor) {
-          res += formatCursor(cast expr, merge(ctx, {
-            formatSubject: (subject) -> subject.wrap(sql -> '$sql as res')
-          })).wrap(sql -> '${ctx.escape(key)}, 
-            (select json_group_array(json(res)) from (select $sql))
-          ');
-        }
+      for (key => select in fields) {
+        res += 
+          formatSelection(select, ctx)
+            .wrap(sql -> '${ctx.escape(key)}, $sql');
         if (i++ < length - 1) res += ',';
       }
       res.wrap(sql -> 'json_object($sql)');

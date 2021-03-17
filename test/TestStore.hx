@@ -16,7 +16,7 @@ class TestStore {
     final amount = 10;
     final objects = [for (i in 0 ... amount) {index: i}];
     asserts.assert(objects.length == amount);
-    final stored = db.insert(Node, objects);
+    final stored = db.insertAll(Node, objects);
     asserts.assert(db.count(Node) == amount);
     final id = stored[amount - 1].id;
     asserts.assert(
@@ -32,7 +32,7 @@ class TestStore {
     final Test = new Collection<{id: String, prop: Int}>('test');
     final a = {prop: 10}
     final b = {prop: 20}
-    db.insert(Test, [a, b]);
+    db.insertAll(Test, [a, b]);
     final gt10 = db.first(Test.where(Test.prop > 10));
     return assert(gt10.prop == 20);
   }
@@ -41,7 +41,7 @@ class TestStore {
     final db = new Store();
     final Test = new Collection<{id: String, prop: Int}>('test');
     final a = {prop: 10}
-    db.insert(Test, [a, a, a, a]);
+    db.insertAll(Test, [a, a, a, a]);
     final two = Test.take(2);
     asserts.assert(db.count(two) == 2);
     final one = Test.skip(3).take(2);
@@ -52,13 +52,13 @@ class TestStore {
   public function testStuctures() {
     final db = new Store();
     final Test = new Collection<{id: String, a: Int}>('test');
-    db.insertOne(Test, {a: 25});
+    db.insert(Test, {a: 25});
     asserts.assert(db.first(Test.where(Test.a in [25])).a == 25);
     asserts.assert(db.first(Test.where(
       Test.a.isNotIn([1, 1])
     )).a == 25);
     final Structure = new Collection<{id: String, deep: {structure: Int}}>('structure');
-    db.insertOne(Structure, {deep: {structure: 1}});
+    db.insert(Structure, {deep: {structure: 1}});
     asserts.assert(
       db.first(Structure.where(Structure.deep.structure == 0))
       == null
@@ -73,10 +73,10 @@ class TestStore {
   public function testIncludeMany() {
     final db = new Store();
     final Role = new Collection<{id: String, name: String}>('Role');
-    final role1 = db.insertOne(Role, {name: 'role1'});
-    final role2 = db.insertOne(Role, {name: 'role2'});
+    final role1 = db.insert(Role, {name: 'role1'});
+    final role2 = db.insert(Role, {name: 'role2'});
     final User = new Collection<{id: String, roles: Array<String>}>('User');
-    final user = db.insertOne(User, {roles: [role1.id, role2.id]});
+    final user = db.insert(User, {roles: [role1.id, role2.id]});
     final UserAlias = User.as('user1');
     final RoleAlias = Role.as('role');
     final bundled = db.first(
@@ -95,12 +95,12 @@ class TestStore {
     final Entry = new Collection<{id: String}>('Entry');
     final Language = new Collection<{id: String, entry: String}>('Language');
     final Version = new Collection<{id: String, language: String}>('Version');
-    final entry = db.insertOne(Entry, {});
-    final language = db.insertOne(Language, {entry: entry.id});
-    final version1 = db.insertOne(Version, {
+    final entry = db.insert(Entry, {});
+    final language = db.insert(Language, {entry: entry.id});
+    final version1 = db.insert(Version, {
       language: language.id
     });
-    final version2 = db.insertOne(Version, {
+    final version2 = db.insert(Version, {
       language: language.id
     });
     final page = db.first(
@@ -144,11 +144,56 @@ class TestStore {
           'integer'
         )
       );
-    final me = store.insertOne(User, {birthdate: '1900-01-01'});
+    final me = store.insert(User, {birthdate: '1900-01-01'});
     return assert(
       store.first(User.select({age: age}).where(User.id.is(me.id))).age
       ==
       20
     );
+  }
+
+  
+  public function testSubquery() {
+    final store = new Store();
+    final User = new Collection<{id: String, name: String}>('user');
+    final Post = new Collection<{id: String, title: String, user: String}>('post');
+    final user1 = store.insert(User, {name: 'bob'});
+    final post1 = store.insert(Post, {title: 'hello', user: user1.id});
+    final userWithPosts = store.first(
+      User.where(User.id == user1.id).select(
+        User.fields.with({
+          posts: Post.where(Post.user == User.id).select({
+            id: Post.id
+          })
+        })
+      )
+    );
+    asserts.assert(userWithPosts.name == 'bob');
+    asserts.assert(userWithPosts.posts[0].id == post1.id);
+    return asserts.done();
+  }
+
+    
+  public function testOrderBy() {
+    final store = new Store();
+    final User = new Collection<{id: String, name: String}>('user');
+    final Contact = new Collection<{id: String, user: String}>('contact');
+    final user1 = store.insert(User, {name: 'b'});
+    final user2 = store.insert(User, {name: 'a'});
+    final contact1 = store.insert(Contact, {user: user1.id});
+    final contact2 = store.insert(Contact, {user: user2.id});
+    final results = store.all(
+      Contact
+        .leftJoin(User, User.id == Contact.user)
+        .select(
+          Contact.fields.with({
+            user: User.fields
+          })
+        )
+        .orderBy([User.name.asc()])
+    );
+    asserts.assert(results[0].user.name == 'a');
+    asserts.assert(results[1].user.name == 'b');
+    return asserts.done();
   }
 }

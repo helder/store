@@ -68,7 +68,7 @@ class SqliteStore implements Store {
       .get(stmt.params);
   }
   
-  public function insert<Row:Document, In:{?id: String} & Row>(
+  public function insertAll<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
     objects: Array<In>
   ): Array<Row> {
@@ -87,14 +87,14 @@ class SqliteStore implements Store {
     return cast objects;
   }
 
-  public function insertOne<Row:Document, In:{?id: String} & Row>(
+  public function insert<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
     object: In
   ): Row {
-    return insert(collection, [object])[0];
+    return insertAll(collection, [object])[0];
   }
 
-  public function save<Row:Document>(collection: Collection<Row>, objects: Array<Row>): Array<Row> {
+  public function saveAll<Row:Document>(collection: Collection<Row>, objects: Array<Row>): Array<Row> {
     /*final update = db.transaction(() -> {
 
     });
@@ -102,8 +102,8 @@ class SqliteStore implements Store {
     return objects;
   }
 
-  public function saveOne<Row:Document>(collection: Collection<Row>, object: Row): Row {
-    return save(collection, [object])[0];
+  public function save<Row:Document>(collection: Collection<Row>, object: Row): Row {
+    return saveAll(collection, [object])[0];
   }
 
   public function transaction<T>(run: () -> T): T {
@@ -111,6 +111,7 @@ class SqliteStore implements Store {
   }
 
   function prepare(query: String): SqliteStatement {
+    // trace(query);
     return createOnError(() -> db.prepare(query));
   }
 
