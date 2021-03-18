@@ -14,11 +14,11 @@ typedef FormatCursorContext = {
   formatAccess: (on: String, field: String) -> String,
   formatField: (path: Array<String>) -> String,
   formatUnwrapArray: (sql: String) -> String,
-  escape: (value: Any) -> String,
+  escape: (value: Null<Any>) -> String,
   escapeId: (id: String) -> String
 }
 
-function formatSelection<T>(selection: Selection<T>, ctx: FormatExprContext): Statement {
+function formatSelection<T>(selection: Null<Selection<T>>, ctx: FormatExprContext): Statement {
   return switch selection {
     case null: '`data`';
     case Cursor(cursor) if (cursor is CursorSingleRow):
@@ -40,7 +40,7 @@ function formatSelection<T>(selection: Selection<T>, ctx: FormatExprContext): St
       var res: Statement = '';
       var i = 0;
       var length = fields.keys().length;
-      for (key => select in fields) {
+      @:nullSafety(Off) for (key => select in fields) {
         res += 
           formatSelection(select, ctx)
             .wrap(sql -> '${ctx.escape(key)}, $sql');
@@ -70,7 +70,7 @@ function formatFrom(from: From, ctx: FormatExprContext): Statement {
   }
 }
 
-function formatOrderBy(orderBy: Array<OrderBy>, ctx: FormatExprContext): Statement {
+function formatOrderBy(orderBy: Null<Array<OrderBy>>, ctx: FormatExprContext): Statement {
   if (orderBy == null || orderBy.length == 0) return '';
   var orders = [];
   var params = [];
@@ -97,7 +97,7 @@ private function formatCursor<Row>(
     'limit ${if (c.limit == null) '0' else ctx.escape(c.limit)}' else '';
   final offset = if (c.offset != null)
     'offset ${ctx.escape(c.offset)}' else '';
-  final selection: Statement = ctx.includeSelection
+  final selection: Statement = ctx.includeSelection == true
     ? ctx.formatSubject(formatSelection(c.select, exprCtx))
     : '';
   final from = formatFrom(c.from, exprCtx);

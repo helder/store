@@ -34,7 +34,7 @@ enum Expr {
   UnOp(op: UnOp, expr: Expr);
   BinOp(op: BinOp, a: Expr, b: Expr);
   Field(path: Array<String>);
-  Value(value: Any);
+  Value(value: Null<Any>);
   Call(method: String, params: Array<Expr>);
   Access(expr: Expr, field: String);
   Query(cursor: Cursor<Any>);
@@ -42,9 +42,10 @@ enum Expr {
 
 typedef EV<T> = Either<Expression<T>, T>;
 
-function toExpr<T>(ev: EV<T>): Expr {
+function toExpr<T>(ev: Null<EV<T>>): Expr {
   return 
-    if (ev is ExpressionImpl) (cast ev).expr
+    if (ev == null) return Value(null);
+    else if (ev is ExpressionImpl) (cast ev).expr
     else if (ev is Expr) (cast ev: Expr) 
     else Value((cast ev: T));
 }

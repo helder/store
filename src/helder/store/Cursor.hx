@@ -6,11 +6,11 @@ import helder.store.From;
 @:allow(helder.store.Cursor)
 class CursorImpl<Row> {
   public var from(default, null): From;
-  public var where(default, null): Expression<Bool> = null;
-  public var select(default, null): Selection<Row> = null;
+  public var where(default, null): Null<Expression<Bool>> = null;
+  public var select(default, null): Null<Selection<Row>> = null;
   public var limit(default, null): Null<Int> = null;
   public var offset(default, null): Null<Int> = null;
-  public var orderBy(default, null): Array<OrderBy> = null;
+  public var orderBy(default, null): Null<Array<OrderBy>> = null;
 }
 
 class Cursor<Row> {

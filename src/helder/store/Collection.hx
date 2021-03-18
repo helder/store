@@ -37,7 +37,7 @@ class CollectionImpl<Row:{}> extends Cursor<Row> {
   }
 
   public function get<T>(name: String): Expression<T> {
-    final path = switch cursor.from {
+    final path: Array<String> = switch cursor.from {
       case Column(From.Table(name, alias), column): [if (alias != null) alias else name, column];
       case Table(name, alias): [if (alias != null) alias else name];
       default: throw 'Cannot field access';

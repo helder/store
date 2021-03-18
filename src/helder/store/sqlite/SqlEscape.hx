@@ -2,9 +2,10 @@ package helder.store.sqlite;
 
 private inline var BACKTICK = '`'.code;
 
-function escape(v:Any):String {
-  if (Std.is(v, Bool)) return v ? '1' : '0';
-  if (v == null || Std.is(v, Int)) return '$v';
+function escape(v:Null<Any>):String {
+  if (v == null) return 'null';
+  if (v is Bool) return v ? '1' : '0';
+  if (v is Int) return '$v';
   return escapeString('$v');
 }
 

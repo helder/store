@@ -123,7 +123,7 @@ class SqliteStore implements Store {
         final index = e.message.indexOf(NO_TABLE);
         if (index > -1) {
           final table = e.message.substr(index + NO_TABLE.length).split('.').pop();
-          if (retry != table) {
+          if (retry != table && table != null) {
             createTable(table);
             return next(table);
           }

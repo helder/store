@@ -25,7 +25,7 @@ abstract Selection<T>(Select<T>) from Select<T> {
     if (input is Select) return input;
     final obj: DynamicAccess<Dynamic> = input;
     final res: DynamicAccess<Select<Dynamic>> = {}
-    for (key => value in obj)
+    @:nullSafety(Off) for (key => value in obj)
       res[key] = create(value);
     return Select.Fields(res);
   }
