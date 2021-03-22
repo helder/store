@@ -22,6 +22,14 @@ class TestUpdate {
     });
     asserts.assert(res2.changes == 1);
     asserts.assert(db.first(User).email == 'test@example.com');
+    final res3 = db.update(User.where(User.id == user.id), {
+      name: {
+        given: 'def',
+        last: 'okay'
+      }
+    });
+    asserts.assert(res3.changes == 1);
+    asserts.assert(db.first(User).name.given == 'def');
     return asserts.done();
   }
 }

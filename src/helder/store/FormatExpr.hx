@@ -53,9 +53,11 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
         return if (value) '1' else '0';
       if (value is Array)
         return '(${(cast value: Array<Any>).map(ctx.escape).join(', ')})';
-      return 
-        if (ctx.formatInline == true) ctx.escape(value)
-        else new Statement('?', [value]);
+      if (value is Int || value is Float || value is String)
+        return 
+          if (ctx.formatInline == true) ctx.escape(value)
+          else new Statement('?', [value]);
+      return ctx.escape(value);
     case Field(path):
       return ctx.formatField(path);
     case Call('cast', [e, Value(type)]):
