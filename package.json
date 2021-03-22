@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "postinstall": "lix download",
-    "test": "cross-env ANSICON=true lix run travix"
+    "test": "cross-env ANSICON=true lix run travix run"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^5.4.1",
