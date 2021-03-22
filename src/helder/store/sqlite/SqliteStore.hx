@@ -1,5 +1,7 @@
 package helder.store.sqlite;
 
+import helder.store.FormatCursor.formatCursorUpdate;
+import helder.store.FormatCursor.formatWhere;
 import helder.store.FormatCursor.formatCursorDelete;
 import helder.store.FormatCursor.formatCursorSelect;
 import helder.store.sqlite.SqlEscape.escape;
@@ -72,19 +74,21 @@ class SqliteStore implements Store {
     collection: Collection<Row>, 
     objects: Array<In>
   ): Array<Row> {
-    final table = escapeId(switch collection.cursor.from {
-      case Table(name, _) | Column(Table(name, _), _): name;
-      default: throw 'assert';
+    return db.transaction(() -> {
+      final table = escapeId(switch collection.cursor.from {
+        case Table(name, _) | Column(Table(name, _), _): name;
+        default: throw 'assert';
+      });
+      for (document in objects) {
+        // TODO don't mutate
+        if (!Reflect.hasField(document, 'id'))
+          Reflect.setField(document, 'id', Uuid.nanoId());
+        prepare('insert into ${table} values (?)').run(
+          [Json.stringify(document)]
+        );
+      }
+      return cast objects;
     });
-    for (document in objects) {
-      // TODO don't mutate
-      if (!Reflect.hasField(document, 'id'))
-        Reflect.setField(document, 'id', Uuid.nanoId());
-      prepare('insert into ${table} values (?)').run(
-        [Json.stringify(document)]
-      );
-    }
-    return cast objects;
   }
 
   public function insert<Row:Document, In:{?id: String} & Row>(
@@ -94,16 +98,12 @@ class SqliteStore implements Store {
     return insertAll(collection, [object])[0];
   }
 
-  public function saveAll<Row:Document>(collection: Collection<Row>, objects: Array<Row>): Array<Row> {
-    /*final update = db.transaction(() -> {
-
+  public function update<Row>(cursor: Cursor<Row>, update: Update<Row>): {changes: Int} {
+    return db.transaction(() -> {
+      final stmt = formatCursorUpdate(cursor, update, context);
+      return prepare(stmt.sql)
+        .run(stmt.params);
     });
-    update.call();*/
-    return objects;
-  }
-
-  public function save<Row:Document>(collection: Collection<Row>, object: Row): Row {
-    return saveAll(collection, [object])[0];
   }
 
   public function transaction<T>(run: () -> T): T {

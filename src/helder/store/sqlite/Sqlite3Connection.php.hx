@@ -7,6 +7,7 @@ import uuid.Uuid;
 
 class Sqlite3Connection implements SqliteConnection {
   final db: SQLite3;
+  private static var transactionId = 0;
   public function new(file: String = ':memory:', ?options: SqliteConnectionOptions) {
     db = new SQLite3(file);
     db.enableExceptions(true);
@@ -16,7 +17,7 @@ class Sqlite3Connection implements SqliteConnection {
   public function prepare(sql: String): SqliteStatement
     return new Statement(db, db.prepare(sql));
   public function transaction<T>(run: () -> T): T {
-    final id = Uuid.nanoId();
+    final id = 't${transactionId++}';
     exec('savepoint $id');
     try {
       final res = run();

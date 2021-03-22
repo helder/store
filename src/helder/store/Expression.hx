@@ -240,6 +240,11 @@ class ExpressionImpl<T> {
   ): Expression<Bool> {
     return new Expression(BinOp(LessOrEqual, expr, toExpr(that)));
   }
+  public function concat(
+    that: EV<String>
+  ): Expression<String> {
+    return new Expression(BinOp(Concat, expr, toExpr(that)));
+  }
   public function like(that: EV<String>): Expression<Bool> {
     return new Expression(BinOp(Like, expr, toExpr(that)));
   }

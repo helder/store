@@ -1,5 +1,6 @@
 package helder.store;
 
+import helder.store.Expression.toExpr;
 import helder.store.From.JoinType;
 import helder.store.FormatExpr.FormatExprContext;
 import helder.store.FormatExpr.formatExpr;
@@ -85,6 +86,26 @@ function formatOrderBy(orderBy: Null<Array<OrderBy>>, ctx: FormatExprContext): S
   return new Statement('order by ${orders.join(', ')}', params);
 }
 
+function formatWhere(where: Null<Expression<Bool>>, ctx: FormatExprContext): Statement {
+  return
+    if (where != null) formatExpr(where.expr, ctx)
+    else '1';
+}
+
+function formatUpdate<Row>(update: Update<Row>, ctx: FormatExprContext): Statement {
+  var source: Statement = '`data`';
+  @:nullSafety(Off) for (field => expr in update) {
+    final e = formatExpr(toExpr(expr), ctx);
+    source = 
+      ('json_set(': Statement) +
+        source +
+        ', ' + ctx.escape('$.'+field) +
+        ', ' + e +
+      ')';
+  }
+  return ('set `data`=': Statement) + source;
+}
+
 private function formatCursor<Row>(
   cursor: Cursor<Row>, 
   ctx: FormatCursorContext
@@ -101,12 +122,21 @@ private function formatCursor<Row>(
     ? ctx.formatSubject(formatSelection(c.select, exprCtx))
     : '';
   final from = formatFrom(c.from, exprCtx);
-  final where: Statement = 
-    if (c.where != null) formatExpr(c.where.expr, exprCtx)
-    else '1';
+  final where = formatWhere(c.where, exprCtx);
   final order = formatOrderBy(c.orderBy, exprCtx);
   final sql = selection + 'from' + from + 'where' + where + order + limit + offset;
   return sql;
+}
+
+function formatCursorUpdate<Row>(cursor: Cursor<Row>, update: Update<Row>, ctx: FormatCursorContext) {
+  final c = @:privateAccess cursor.cursor;
+  final exprCtx: FormatExprContext = merge(ctx, {
+    formatCursor: cursor -> formatCursor(cursor, ctx)
+  });
+  final from = formatFrom(c.from, exprCtx);
+  final set = formatUpdate(update, exprCtx);
+  final where = formatWhere(c.where, exprCtx);
+  return ('update': Statement) + from + set + 'where' + where;
 }
 
 function formatCursorSelect<Row>(cursor: Cursor<Row>, ctx: FormatCursorContext) {
