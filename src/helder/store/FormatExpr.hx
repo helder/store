@@ -26,14 +26,6 @@ final binOps: Map<BinOp, String> = [
   Concat => '||'
 ];
 
-function escape(value: Any) {
-  return '${value}';
-}
-
-function escapeId(id: String) {
-  return id;
-}
-
 typedef FormatExprContext = FormatCursorContext & {
   formatCursor: (cursor: Cursor<Any>) -> Statement
 }
@@ -55,13 +47,17 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
           )
         );
     case Value(value):
+      if (value == null)
+        return 'null';
       if (value is Bool)
         return if (value) '1' else '0';
       if (value is Array)
-        return '(${(cast value: Array<Any>).map(escape).join(', ')})';
-      return 
-        if (ctx.formatInline) escape(value)
-        else new Statement('?', [value]);
+        return '(${(cast value: Array<Any>).map(ctx.escape).join(', ')})';
+      if (value is Int || value is Float || value is String)
+        return 
+          if (ctx.formatInline == true) ctx.escape(value)
+          else new Statement('?', [value]);
+      return ctx.escape(value);
     case Field(path):
       return ctx.formatField(path);
     case Call('cast', [e, Value(type)]):
@@ -74,7 +70,7 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
       final params = params.map(e -> formatExpr(e, ctx));
       final expressions = params.map(stmt -> stmt.sql).join(', ');
       return new Statement(
-        '${escapeId(method)}($expressions)',
+        '${ctx.escapeId(method)}($expressions)',
         Lambda.flatMap(params, stmt -> stmt.params)
       );
     case Access(e, field):

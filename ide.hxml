@@ -14,3 +14,4 @@
 
 -D analyzer-optimize
 -D no-deprecation-warnings
+--macro nullSafety("helder", Strict)

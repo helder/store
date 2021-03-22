@@ -1,5 +1,6 @@
 package helder.store;
 
+import helder.store.Expression.toExpr;
 import helder.store.From.JoinType;
 import helder.store.FormatExpr.FormatExprContext;
 import helder.store.FormatExpr.formatExpr;
@@ -14,11 +15,11 @@ typedef FormatCursorContext = {
   formatAccess: (on: String, field: String) -> String,
   formatField: (path: Array<String>) -> String,
   formatUnwrapArray: (sql: String) -> String,
-  escape: (value: Any) -> String,
+  escape: (value: Null<Any>) -> String,
   escapeId: (id: String) -> String
 }
 
-function formatSelection<T>(selection: Selection<T>, ctx: FormatExprContext): Statement {
+function formatSelection<T>(selection: Null<Selection<T>>, ctx: FormatExprContext): Statement {
   return switch selection {
     case null: '`data`';
     case Cursor(cursor) if (cursor is CursorSingleRow):
@@ -40,7 +41,7 @@ function formatSelection<T>(selection: Selection<T>, ctx: FormatExprContext): St
       var res: Statement = '';
       var i = 0;
       var length = fields.keys().length;
-      for (key => select in fields) {
+      @:nullSafety(Off) for (key => select in fields) {
         res += 
           formatSelection(select, ctx)
             .wrap(sql -> '${ctx.escape(key)}, $sql');
@@ -70,7 +71,7 @@ function formatFrom(from: From, ctx: FormatExprContext): Statement {
   }
 }
 
-function formatOrderBy(orderBy: Array<OrderBy>, ctx: FormatExprContext): Statement {
+function formatOrderBy(orderBy: Null<Array<OrderBy>>, ctx: FormatExprContext): Statement {
   if (orderBy == null || orderBy.length == 0) return '';
   var orders = [];
   var params = [];
@@ -85,6 +86,26 @@ function formatOrderBy(orderBy: Array<OrderBy>, ctx: FormatExprContext): Stateme
   return new Statement('order by ${orders.join(', ')}', params);
 }
 
+function formatWhere(where: Null<Expression<Bool>>, ctx: FormatExprContext): Statement {
+  return
+    if (where != null) formatExpr(where.expr, ctx)
+    else '1';
+}
+
+function formatUpdate<Row>(update: Update<Row>, ctx: FormatExprContext): Statement {
+  var source: Statement = '`data`';
+  @:nullSafety(Off) for (field => expr in update) {
+    final e = formatExpr(toExpr(expr), ctx);
+    source = 
+      ('json_set(': Statement) +
+        source +
+        ', ' + ctx.escape('$.'+field) +
+        ', ' + e +
+      ')';
+  }
+  return ('set `data`=': Statement) + source;
+}
+
 private function formatCursor<Row>(
   cursor: Cursor<Row>, 
   ctx: FormatCursorContext
@@ -97,16 +118,25 @@ private function formatCursor<Row>(
     'limit ${if (c.limit == null) '0' else ctx.escape(c.limit)}' else '';
   final offset = if (c.offset != null)
     'offset ${ctx.escape(c.offset)}' else '';
-  final selection: Statement = ctx.includeSelection
+  final selection: Statement = ctx.includeSelection == true
     ? ctx.formatSubject(formatSelection(c.select, exprCtx))
     : '';
   final from = formatFrom(c.from, exprCtx);
-  final where: Statement = 
-    if (c.where != null) formatExpr(c.where.expr, exprCtx)
-    else '1';
+  final where = formatWhere(c.where, exprCtx);
   final order = formatOrderBy(c.orderBy, exprCtx);
   final sql = selection + 'from' + from + 'where' + where + order + limit + offset;
   return sql;
+}
+
+function formatCursorUpdate<Row>(cursor: Cursor<Row>, update: Update<Row>, ctx: FormatCursorContext) {
+  final c = @:privateAccess cursor.cursor;
+  final exprCtx: FormatExprContext = merge(ctx, {
+    formatCursor: cursor -> formatCursor(cursor, ctx)
+  });
+  final from = formatFrom(c.from, exprCtx);
+  final set = formatUpdate(update, exprCtx);
+  final where = formatWhere(c.where, exprCtx);
+  return ('update': Statement) + from + set + 'where' + where;
 }
 
 function formatCursorSelect<Row>(cursor: Cursor<Row>, ctx: FormatCursorContext) {

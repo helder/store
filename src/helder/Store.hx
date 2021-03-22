@@ -7,17 +7,18 @@ interface Store {
   function first<Row>(cursor: Cursor<Row>): Null<Row>;
   function delete<Row>(cursor: Cursor<Row>): {changes: Int};
   function count<Row>(cursor: Cursor<Row>): Int;
-  function insertAll<Row:Document, In:{?id: String} & Row>(
-    collection: Collection<Row>,
-    objects: Array<In>
-  ): Array<Row>;
   function insert<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
     object: In
   ): Row;
-  function saveAll<Row:Document>(collection: Collection<Row>, objects: Array<Row>): Array<Row>;
+  function insertAll<Row:Document, In:{?id: String} & Row>(
+    collection: Collection<Row>,
+    objects: Array<In>
+  ): Array<Row>;
+  function update<Row>(cursor:Cursor<Row>, partial:Update<Row>): {changes: Int};
+  /*function saveAll<Row:Document>(collection: Collection<Row>, objects: Array<Row>): Array<Row>;
   function save<Row:Document>(collection: Collection<Row>, object: Row): Row;
-  /*function createIndex<Row>(
+  function createIndex<Row>(
     collection: Collection<Row>,
     name: String,
     on: Array<Expression<Dynamic>>
