@@ -8,7 +8,7 @@ import helder.store.FormatCursor.formatCursorDelete;
 import helder.store.FormatCursor.formatCursorSelect;
 import helder.store.sqlite.SqlEscape.escape;
 import helder.store.sqlite.SqlEscape.escapeId;
-import helder.store.sqlite.SqliteConnection;
+import helder.store.Driver;
 import haxe.Json;
 import uuid.Uuid;
 import helder.store.FormatCursor.FormatCursorContext;
@@ -37,16 +37,11 @@ final context: FormatCursorContext = {
   escapeId: escapeId
 }
 
-typedef Connection =
-  #if js BetterSqlite3Connection;
-  #elseif php Sqlite3Connection;
-  #else #error 'Not available on this platform' #end
-
 class SqliteStore implements Store {
-  final db: SqliteConnection;
+  final db: Driver;
 
-  public function new(file: String = ':memory:', ?options: SqliteConnectionOptions) {
-    this.db = new Connection(file, options);
+  public function new(db: Driver) {
+    this.db = db;
     this.db.exec('PRAGMA journal_mode = WAL');
     this.db.exec('PRAGMA optimize');
   }
@@ -140,7 +135,7 @@ class SqliteStore implements Store {
     return db.transaction(run);
   }
 
-  function prepare(query: String): SqliteStatement {
+  function prepare(query: String): PreparedStatement {
     // trace(query);
     return createOnError(() -> db.prepare(query));
   }

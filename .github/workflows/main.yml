@@ -16,4 +16,5 @@ jobs:
         php-version: '7.4'
     - run: yarn
     - run: yarn test node
+    - run: yarn test node -D sqljs
     - run: yarn test php7
