@@ -1,7 +1,7 @@
 {
   "haxe.configurations": [
-    ["ide.hxml", "-js", "js", "--no-output", "-D", "sqljs"],
-    ["ide.hxml", "-php", "php", "--no-output"]
+    [".vscode/js.hxml"],
+    [".vscode/php.hxml"]
   ],
   "editor.insertSpaces": true,
   "haxe.executable": {
