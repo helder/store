@@ -1,5 +1,7 @@
 package helder.store.sqlite;
 
+import helder.store.Expression.toExpr;
+import helder.store.FormatExpr.formatExpr;
 import helder.store.FormatCursor.formatCursorUpdate;
 import helder.store.FormatCursor.formatWhere;
 import helder.store.FormatCursor.formatCursorDelete;
@@ -11,6 +13,7 @@ import haxe.Json;
 import uuid.Uuid;
 import helder.store.FormatCursor.FormatCursorContext;
 import helder.Store;
+import tink.Anon.merge;
 
 function formatField(path: Array<String>) {
   return switch path {
@@ -104,6 +107,33 @@ class SqliteStore implements Store {
       return prepare(stmt.sql)
         .run(stmt.params);
     });
+  }
+
+  public function createIndex<Row:Document>(
+    collection: Collection<Row>,
+    name: String,
+    on: Array<Expression<Dynamic>>
+  ) {
+    final tableName = switch collection.cursor.from {
+      case Table(name, _) | Column(Table(name, _), _): name;
+      default: throw 'assert';
+    }
+    final table = escapeId(tableName);
+    final exprs = [];
+    for (expr in on) {
+      final stmt = formatExpr(toExpr(expr), merge(context, {
+        formatInline: true,
+        formatCursor: cursor -> throw 'assert'
+      }));
+      if (stmt.params.length > 0) {
+        throw 'Parameters in index expressions are currently unsupported';
+      }
+      exprs.push(stmt.sql);
+    }
+    final sql = 'create index if not exists ${escape(
+      [tableName, name].join('.')
+    )} on ${table}(${exprs.join(', ')});';
+    return createOnError(() -> db.exec(sql));
   }
 
   public function transaction<T>(run: () -> T): T {

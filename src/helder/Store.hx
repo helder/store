@@ -16,12 +16,10 @@ interface Store {
     objects: Array<In>
   ): Array<Row>;
   function update<Row>(cursor:Cursor<Row>, partial:Update<Row>): {changes: Int};
-  /*function saveAll<Row:Document>(collection: Collection<Row>, objects: Array<Row>): Array<Row>;
-  function save<Row:Document>(collection: Collection<Row>, object: Row): Row;
-  function createIndex<Row>(
+  function createIndex<Row:Document>(
     collection: Collection<Row>,
     name: String,
     on: Array<Expression<Dynamic>>
-  ): Void;*/
+  ): Void;
   function transaction<T>(run: () -> T): T;
 }
