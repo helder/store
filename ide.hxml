@@ -4,6 +4,7 @@
 -lib tink_anon
 -lib deep_equal
 -lib better_sqlite3
+-lib sql.js
 -lib uuid
 -dce full
 

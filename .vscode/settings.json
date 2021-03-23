@@ -1,6 +1,6 @@
 {
   "haxe.configurations": [
-    ["ide.hxml", "-js", "js", "--no-output"],
+    ["ide.hxml", "-js", "js", "--no-output", "-D", "sqljs"],
     ["ide.hxml", "-php", "php", "--no-output"]
   ],
   "editor.insertSpaces": true,

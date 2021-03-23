@@ -1,32 +1,31 @@
-package helder.store.sqlite;
+package helder.store.drivers;
 
-import helder.store.sqlite.SqliteConnection;
+import helder.store.Driver;
 import better_sqlite3.Database;
+import BetterSqlite3 as BSQL3;
 
-class BetterSqlite3Connection implements SqliteConnection {
+class BetterSqlite3 implements Driver {
   final db: Database;
-  public function new(file: String = ':memory:', ?options: SqliteConnectionOptions)
-    db = BetterSqlite3.call(file, (cast options: better_sqlite3.Options));
+  public function new(file: String = ':memory:', ?options: DriverOptions)
+    db = BSQL3.call(file, (cast options: better_sqlite3.Options));
   public function exec(sql: String)
     db.exec(sql);
-  public function pragma(sql: String) 
-    db.pragma(sql);
-  public function prepare(sql: String): SqliteStatement
+  public function prepare(sql: String): PreparedStatement
     return new Statement(db.prepare(sql));
   public function transaction<T>(run: () -> T): T
     return db.transaction(run).call();
 }
 
-typedef PreparedStatement = {
-  function pluck(bool: Bool): PreparedStatement;
+typedef BSQL3Statement = {
+  function pluck(bool: Bool): BSQL3Statement;
   function all<T>(...params: Dynamic): Array<T>;
   function run<T>(...params: Dynamic): {changes: Int};
   function get<T>(...params: Dynamic): T;
 }
 
 private class Statement {
-  final stmt: PreparedStatement;
-  public function new(stmt: PreparedStatement)
+  final stmt: BSQL3Statement;
+  public function new(stmt: BSQL3Statement)
     this.stmt = stmt;
   public function all<T>(params: Array<Dynamic>): Array<T>
     return stmt.pluck(true).all(...params);

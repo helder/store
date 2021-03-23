@@ -1,20 +1,20 @@
-package helder.store.sqlite;
+package helder.store.drivers;
 
-import helder.store.sqlite.SqliteConnection;
-import php.db.SQLite3;
-import php.db.SQLite3Stmt;
-import uuid.Uuid;
+import helder.store.Driver;
+import php.db.SQLite3 as SQL3;
+import php.db.SQLite3Stmt as SQL3Statement;
 
-class Sqlite3Connection implements SqliteConnection {
-  final db: SQLite3;
+class Sqlite3 implements Driver {
+  final db: SQL3;
   private static var transactionId = 0;
-  public function new(file: String = ':memory:', ?options: SqliteConnectionOptions) {
-    db = new SQLite3(file);
+  // TODO apply flags of options
+  public function new(file: String = ':memory:', ?options: DriverOptions) {
+    db = new SQL3(file);
     db.enableExceptions(true);
   }
   public function exec(sql: String)
     db.exec(sql);
-  public function prepare(sql: String): SqliteStatement
+  public function prepare(sql: String): PreparedStatement
     return new Statement(db, db.prepare(sql));
   public function transaction<T>(run: () -> T): T {
     final id = 't${transactionId++}';
@@ -31,9 +31,9 @@ class Sqlite3Connection implements SqliteConnection {
 }
 
 private class Statement {
-  final db: SQLite3;
-  final stmt: SQLite3Stmt;
-  public function new(db, stmt: SQLite3Stmt) {
+  final db: SQL3;
+  final stmt: SQL3Statement;
+  public function new(db, stmt: SQL3Statement) {
     this.db = db;
     this.stmt = stmt;
   }
