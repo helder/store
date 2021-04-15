@@ -2,6 +2,7 @@ package helder;
 
 import helder.store.*;
 
+@:expose
 interface Store {
   function all<Row>(cursor: Cursor<Row>): Array<Row>;
   function first<Row>(cursor: Cursor<Row>): Null<Row>;

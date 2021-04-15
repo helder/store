@@ -153,6 +153,8 @@ abstract Expression<T>(ExpressionImpl<T>) {
     return a.lessOrEqual(b);
 }
 
+@:expose
+@:native('Expression')
 class ExpressionImpl<T> {
   public final expr: Expr;
 

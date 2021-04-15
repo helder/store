@@ -13,6 +13,7 @@ class CursorImpl<Row> {
   public var orderBy(default, null): Null<Array<OrderBy>> = null;
 }
 
+@:expose
 class Cursor<Row> {
   public final cursor: CursorImpl<Row>;
 

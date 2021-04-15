@@ -1,5 +1,6 @@
 package helder.store;
 
+@:expose
 interface Driver {
   function transaction<T>(run: () -> T): T;
   function exec(sql: String): Void;

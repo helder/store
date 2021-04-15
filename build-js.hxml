@@ -1,0 +1,12 @@
+base.hxml
+#-lib helder.std
+-lib genes
+-D dts
+-D js-source-map
+-dce full
+helder.Store
+helder.store
+helder.store.drivers.BetterSqlite3
+helder.store.drivers.SqlJs
+--macro keep('helder.store')
+-js dist/esm/index.js

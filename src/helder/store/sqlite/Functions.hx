@@ -3,6 +3,7 @@ package helder.store.sqlite;
 import helder.store.Expression.EV;
 import helder.store.Expression.toExpr;
 
+@:expose
 class Functions {
   public static function castAs(x:EV<Dynamic>, type:String) {
     return new Expression(Call('cast', [toExpr(x), toExpr(type)]));
@@ -58,6 +59,7 @@ class Functions {
   }
 
   /** For a string value X, the length(X) function returns the number of characters (not bytes) in X prior to the first NUL character. Since SQLite strings do not normally contain NUL characters, the length(X) function will usually return the total number of characters in the string X. For a blob value X, length(X) returns the number of bytes in the blob. If X is NULL then length(X) is NULL. If X is numeric then length(X) returns the length of a string representation of X.*/
+  @:native('strLength') 
   public static function length(x:EV<String>):Expression<Int> {
     return new Expression(Call('length', [toExpr(x)]));
   }

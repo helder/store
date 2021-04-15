@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "umd",
+    "moduleResolution": "node",
+    "outDir": "dist/umd",
+    "allowJs": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["dist/esm"]
+}

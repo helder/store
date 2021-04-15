@@ -37,6 +37,7 @@ final context: FormatCursorContext = {
   escapeId: escapeId
 }
 
+@:expose
 class SqliteStore implements Store {
   final db: Driver;
 
@@ -64,7 +65,7 @@ class SqliteStore implements Store {
 
   public function count<Row>(cursor: Cursor<Row>): Int {
     final stmt = formatCursorSelect(cursor, context);
-    return prepare('select count(*) from (${stmt.sql})')
+    return prepare('select count() from (${stmt.sql})')
       .get(stmt.params);
   }
   

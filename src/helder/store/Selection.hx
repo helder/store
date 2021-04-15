@@ -5,10 +5,11 @@ import helder.store.Collection.CollectionImpl;
 import helder.store.Expression.ExpressionImpl;
 
 @:using(helder.store.Selection)
+@:expose
 enum Select<T> {
   Expression<T>(e: Expression<T>): Select<T>;
   Cursor<T>(c: Cursor<T>): Select<T>;
-  FieldsOf<T>(source: String, ?with: Selection<Dynamic>): Select<T>;
+  FieldsOf<T>(source: String, ?add: Selection<Dynamic>): Select<T>;
   Fields<T>(fields: DynamicAccess<Select<Dynamic>>): Select<T>;
 }
 

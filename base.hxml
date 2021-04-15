@@ -6,12 +6,7 @@
 -lib better_sqlite3
 -lib sql.js
 -lib uuid
--dce full
-
-#-lib helder.std
-#-lib genes
-#-D genes.include_extension
-#-D dts
+-lib genes
 
 -D analyzer-optimize
 -D no-deprecation-warnings

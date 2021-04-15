@@ -7,6 +7,7 @@ enum JoinType {
   Inner;
 }
 
+@:expose
 @:using(helder.store.From.FromTools) enum From {
   Table(name: String, ?alias: String);
   Join(left: From, right: From, type: JoinType, on: Expr);

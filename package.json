@@ -1,11 +1,14 @@
 {
   "name": "helder.store",
   "version": "0.0.0",
-  "main": "index.js",
+  "typings": "./dist/esm/index",
+  "module": "./dist/esm/index.js",
+  "main": "./dist/umd/index.js",
   "license": "MIT",
   "scripts": {
-    "postinstall": "lix download",
-    "test": "cross-env ANSICON=true lix run travix run"
+    "postinstall": "lix download && symlink-dir . node_modules/helder.store",
+    "test": "cross-env ANSICON=true lix run travix run",
+    "test:ts": "haxe build-js.hxml && (tsc > nul 2>&1 || cd .) && uvu -r ts-node/register test/ts"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^5.4.1",
@@ -13,8 +16,13 @@
     "better-sqlite3": "^7.1.2",
     "cross-env": "^7.0.3",
     "dts2hx": "^0.15.3",
+    "esm": "^3.2.25",
     "lix": "^15.10.1",
-    "sql.js": "^1.5.0"
+    "sql.js": "^1.5.0",
+    "symlink-dir": "^5.0.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4",
+    "uvu": "^0.4.1"
   },
   "dependencies": {
     "helder.std": "4.2.1-0.2.0"

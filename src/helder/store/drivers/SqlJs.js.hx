@@ -8,6 +8,7 @@ import SqlJs as SqlJsLib;
 @:native('__sqlJs.Database')
 extern class Database extends sql_js.Database {}
 
+@:expose
 class SqlJs implements Driver {
   final db: Database;
   private static var transactionId = 0;

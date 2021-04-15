@@ -7,6 +7,7 @@ enum abstract OrderDirection(String) {
   final Desc = 'desc';
 }
 
+@:expose
 typedef OrderBy = {
   expr: Expr,
   order: OrderDirection

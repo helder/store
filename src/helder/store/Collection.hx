@@ -2,9 +2,40 @@ package helder.store;
 
 import helder.store.From;
 
+#if js
+@:genes.type('(U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never')
+typedef UnionToIntersection<U> = Dynamic;
+
+@:genes.type('Row extends object
+  ? {[K in keyof Row]-?: Expression<Row[K]> & FieldsOf<Row[K]>}
+  : unknown
+')
+typedef FieldsOf<Row> = Dynamic;
+
+@:genes.type('CollectionImpl<Row> & UnionToIntersection<FieldsOf<Row>>')
+typedef TSCollection<Row> = Dynamic;
+
+@:expose
+@:native('Collection')
+@:genes.type('{new<Row extends {}>(name: string, options?: {}): TSCollection<Row>}')
+final ESCollection = js.Syntax.code('
+  class Collection extends CollectionImpl {
+    constructor(name, options) {
+      super(name, options);
+      return new Proxy(this, {
+        get: (target, property) => {
+          if (property in target) return target[property];
+          return target.get(property);
+        }
+      });
+    }
+  }
+');
+#end
+
 @:forward
 abstract Collection<T:{}>(CollectionImpl<T>) to CollectionImpl<T> {
-  public function new(name: String, ?options: {?alias: String}) {
+  inline public function new(name: String, ?options: {?alias: String}) {
     final inst = new CollectionImpl<T>(name, options);
     this = 
       #if js new helder.store.util.RuntimeProxy(inst, inst.get)
