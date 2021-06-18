@@ -71,7 +71,7 @@ class SqliteStore implements Store {
   
   public function insertAll<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
-    objects: Array<In>
+    objects: Array<IdLess<In>>
   ): Array<Row> {
     return db.transaction(() -> {
       final table = escapeId(switch collection.cursor.from {
@@ -92,7 +92,7 @@ class SqliteStore implements Store {
 
   public function insert<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
-    object: In
+    object: IdLess<In>
   ): Row {
     return insertAll(collection, [object])[0];
   }
