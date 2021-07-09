@@ -1,4 +1,4 @@
-# @install: dts2hx better-sqlite3 -o haxe_libraries/.extern
--cp haxe_libraries/.extern/integer
--cp haxe_libraries/.extern/better-sqlite3
+# @install: dts2hx better-sqlite3 -o ${SCOPE_DIR}/haxe_libraries/.extern
+-cp ${SCOPE_DIR}/haxe_libraries/.extern/integer
+-cp ${SCOPE_DIR}/haxe_libraries/.extern/better-sqlite3
 -D better_sqlite3=5.4.1

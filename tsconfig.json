@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "module": "umd",
+    "declaration": true,
+    "declarationMap": true,
+    "module": "CommonJS",
     "moduleResolution": "node",
-    "outDir": "dist/umd",
+    "outDir": "dist/cjs",
     "allowJs": true,
     "removeComments": true,
     "sourceMap": true,

@@ -10,3 +10,4 @@ helder.store.drivers.BetterSqlite3
 helder.store.drivers.SqlJs
 --macro keep('helder.store')
 -js dist/esm/index.js
+--cmd tsc | dev-null

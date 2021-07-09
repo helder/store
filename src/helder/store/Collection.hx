@@ -2,7 +2,7 @@ package helder.store;
 
 import helder.store.From;
 
-#if js
+#if (js && genes)
 @:genes.type('(U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never')
 typedef UnionToIntersection<U> = Dynamic;
 

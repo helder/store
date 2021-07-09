@@ -78,15 +78,14 @@ class SqliteStore implements Store {
         case Table(name, _) | Column(Table(name, _), _): name;
         default: throw 'assert';
       });
-      for (document in objects) {
-        // TODO don't mutate
-        if (!Reflect.hasField(document, 'id'))
-          Reflect.setField(document, 'id', Uuid.nanoId());
+      return objects.map(document -> {
+        final res: Row = cast document;
+        if (res.id == null) res.id = Uuid.nanoId();
         prepare('insert into ${table} values (?)').run(
-          [Json.stringify(document)]
+          [Json.stringify(res)]
         );
-      }
-      return cast objects;
+        return res;
+      });
     });
   }
 

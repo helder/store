@@ -6,7 +6,6 @@
 -lib better_sqlite3
 -lib sql.js
 -lib uuid
--lib genes
 
 -D analyzer-optimize
 -D no-deprecation-warnings

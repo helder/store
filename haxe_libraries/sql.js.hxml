@@ -1,5 +1,5 @@
-# @install: dts2hx sql.js -o haxe_libraries/.extern
--cp haxe_libraries/.extern/emscripten
--cp haxe_libraries/.extern/node
--cp haxe_libraries/.extern/sql.js
+# @install: dts2hx sql.js -o ${SCOPE_DIR}/haxe_libraries/.extern
+-cp ${SCOPE_DIR}/haxe_libraries/.extern/emscripten
+-cp ${SCOPE_DIR}/haxe_libraries/.extern/node
+-cp ${SCOPE_DIR}/haxe_libraries/.extern/sql.js
 -D sql.js

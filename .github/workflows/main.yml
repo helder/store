@@ -18,3 +18,4 @@ jobs:
     - run: yarn test node
     - run: yarn test node -D sqljs
     - run: yarn test php7
+    - run: yarn test:ts
