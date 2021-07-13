@@ -1,0 +1,13 @@
+{
+  "name": "helder.store",
+  "license": "MIT",
+  "classPath": "src",
+  "contributors": ["benmerckx"],
+  "releasenote": "See repository",
+  "version": "0.0.0",
+  "url": "https://github.com/helder/store",
+  "dependencies": {
+    "tink_core": "",
+    "uuid": ""
+  }
+}
