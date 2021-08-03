@@ -1,10 +1,8 @@
 package test;
 
-@:asserts
-class TestJoins {
-  public function new() {}
-      
-  public function testOrderBy() {
+final TestJoins = suite(test -> {
+
+  test('OrderBy', () -> {
     final store = new Store();
     final User = new Collection<{id: String, name: String}>('user');
     final Contact = new Collection<{id: String, user: String}>('contact');
@@ -22,8 +20,8 @@ class TestJoins {
         )
         .orderBy([User.name.asc()])
     );
-    asserts.assert(results[0].user.name == 'a');
-    asserts.assert(results[1].user.name == 'b');
-    return asserts.done();
-  }
-}
+    assert.is(results[0].user.name, 'a');
+    assert.is(results[1].user.name, 'b');
+  });
+
+});

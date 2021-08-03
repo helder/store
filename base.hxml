@@ -1,6 +1,6 @@
 -cp src
+-lib helder.unit
 -lib tink_core
--lib tink_unittest
 -lib tink_anon
 -lib deep_equal
 -lib better_sqlite3

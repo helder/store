@@ -1,10 +1,8 @@
 package test;
 
-@:asserts
-class TestSubQueries {
-  public function new() {}
+final TestSubQueries = suite(test -> {
 
-  public function testIncludeMany() {
+  test('IncludeMany', () -> {
     final db = new Store();
     final Role = new Collection<{id: String, name: String}>('Role');
     final role1 = db.insert(Role, {name: 'role1'});
@@ -22,7 +20,7 @@ class TestSubQueries {
         })
       )
     );
-    asserts.compare( 
+    assert.equal( 
       [{name: 'role1'}, {name: 'role2'}],
       bundled.roles
     );
@@ -48,17 +46,16 @@ class TestSubQueries {
         })
       )
     );
-    asserts.compare(merge(entry, {
+    assert.equal(merge(entry, {
       languages: [
         merge(language, {
           versions: [version1, version2]
         })
       ]
     }), page);
-    return asserts.done();
-  }
+  });
   
-  public function testSubquery() {
+  test('Subquery', () -> {
     final store = new Store();
     final User = new Collection<{id: String, name: String}>('user');
     final Post = new Collection<{id: String, title: String, user: String}>('post');
@@ -73,8 +70,8 @@ class TestSubQueries {
         })
       )
     );
-    asserts.assert(userWithPosts.name == 'bob');
-    asserts.assert(userWithPosts.posts[0].id == post1.id);
-    return asserts.done();
-  }
-}
+    assert.is(userWithPosts.name, 'bob');
+    assert.is(userWithPosts.posts[0].id, post1.id);
+  });
+
+});

@@ -1,3 +1,4 @@
 base.hxml
 -dce full
---main test.Run
+-D helder.unit.package=test
+--main helder.Unit

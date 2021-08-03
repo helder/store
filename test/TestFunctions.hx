@@ -1,10 +1,8 @@
 package test;
 
-@:asserts
-class TestFunctions {
-  public function new() {}
-  
-  public function testFunctions() {
+final TestFunctions = suite(test -> {
+
+  test('Functions', () -> {
     final store = new Store();
     final User = new Collection<{id: String, birthdate: String}>('User');
     final now = '1920-01-01';
@@ -25,10 +23,10 @@ class TestFunctions {
         )
       );
     final me = store.insert(User, {birthdate: '1900-01-01'});
-    return assert(
-      store.first(User.select({age: age}).where(User.id.is(me.id))).age
-      ==
+    assert.is(
+      store.first(User.select({age: age}).where(User.id.is(me.id))).age,
       20
     );
-  }
-}
+  });
+
+});
