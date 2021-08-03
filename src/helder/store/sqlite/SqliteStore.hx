@@ -3,7 +3,6 @@ package helder.store.sqlite;
 import helder.store.Expression.toExpr;
 import helder.store.FormatExpr.formatExpr;
 import helder.store.FormatCursor.formatCursorUpdate;
-import helder.store.FormatCursor.formatWhere;
 import helder.store.FormatCursor.formatCursorDelete;
 import helder.store.FormatCursor.formatCursorSelect;
 import helder.store.sqlite.SqlEscape.escape;

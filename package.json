@@ -1,10 +1,20 @@
 {
   "name": "helder.store",
   "version": "0.0.0",
-  "typings": "./dist/esm/index.d.ts",
+  "license": "MIT",
   "module": "./dist/esm/index.js",
   "main": "./dist/cjs/index.js",
-  "license": "MIT",
+  "exports": {
+    ".": "./dist/esm/index.js",
+    "./": "./dist/esm/helder/store/"
+  },
+  "typings": "./dist/esm/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "dist/esm/index.d.ts": [ "./dist/esm/index.d.ts" ],
+      "*": [ "./dist/esm/helder/store/*" ]
+    }
+  },
   "scripts": {
     "prepare": "lix download && symlink-dir . node_modules/helder.store",
     "test": "cross-env ANSICON=true lix run travix run",

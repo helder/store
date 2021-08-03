@@ -1,4 +1,4 @@
-import {Collection, SqliteStore, Functions, Expression, BetterSqlite3} from 'helder.store'
+import {BetterSqlite3, Collection, SqliteStore} from 'helder.store'
 import {test} from 'uvu'
 import * as assert from 'uvu/assert'
 
@@ -8,7 +8,7 @@ function store() {
 
 test('basic', () => {
   const db = store()
-  const Node = new Collection<{id: string, index: number}>(`node`)
+  const Node = new Collection<{id: string; index: number}>(`node`)
   const amount = 10
   const objects = Array.from({length: amount}).map((_, index) => ({index}))
   assert.equal(objects.length, amount)
