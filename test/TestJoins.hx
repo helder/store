@@ -1,6 +1,8 @@
 package test;
 
-final TestJoins = suite(test -> {
+import test.DbSuite.dbSuite;
+
+final TestJoins = dbSuite(test -> {
 
   test('OrderBy', () -> {
     final store = new Store();

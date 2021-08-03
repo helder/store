@@ -1,6 +1,8 @@
 package test;
 
-final TestSubQueries = suite(test -> {
+import test.DbSuite.dbSuite;
+
+final TestSubQueries = dbSuite(test -> {
 
   test('IncludeMany', () -> {
     final db = new Store();

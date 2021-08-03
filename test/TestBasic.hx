@@ -1,8 +1,9 @@
 package test;
 
+import test.DbSuite.dbSuite;
 import helder.Unit.suite;
 
-final TestBasic = suite(test -> {
+final TestBasic = dbSuite(test -> {
 
   test('Basic', () -> {
     final db = new Store();

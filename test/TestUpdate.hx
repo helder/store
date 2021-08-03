@@ -1,6 +1,8 @@
 package test;
 
-final TestUpdate = suite(test -> {
+import test.DbSuite.dbSuite;
+
+final TestUpdate = dbSuite(test -> {
 
   test('Update', () -> {
     final db = new Store();

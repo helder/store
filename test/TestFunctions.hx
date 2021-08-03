@@ -1,6 +1,8 @@
 package test;
 
-final TestFunctions = suite(test -> {
+import test.DbSuite.dbSuite;
+
+final TestFunctions = dbSuite(test -> {
 
   test('Functions', () -> {
     final store = new Store();
