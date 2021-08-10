@@ -42,11 +42,12 @@ enum Expr {
 
 typedef EV<T> = Either<Expression<T>, T>;
 
-function toExpr<T>(ev: Null<EV<T>>): Expr {
+function toExpr<T>(ev: Null<Either<EV<T>, Cursor<T>>>): Expr {
   return 
     if (ev == null) return Value(null);
     else if (ev is ExpressionImpl) (cast ev).expr
     else if (ev is Expr) (cast ev: Expr) 
+    else if (ev is Cursor) Query(ev)
     else Value((cast ev: T));
 }
 
@@ -72,7 +73,7 @@ abstract Expression<T>(ExpressionImpl<T>) {
     return helder.store.macro.Expression.getProp(expr, property);
     #end
   }
-  // @:forwardStatics prevents one from importing statics with wildcard...
+  
   inline public static function value(value: Any) {
     return ExpressionImpl.value(value);
   }
@@ -82,6 +83,9 @@ abstract Expression<T>(ExpressionImpl<T>) {
   }
 
   @:op(a in b) inline static function isIn<T>(a:Expression<T>, b:Expression<Array<T>>):Expression<Bool>
+    return a.isIn(b);
+
+  @:op(a in b) inline static function inCursor<T>(a:Expression<T>, b:Cursor<T>):Expression<Bool>
     return a.isIn(b);
 
   @:op(a + b) inline static function add<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>

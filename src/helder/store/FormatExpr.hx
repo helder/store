@@ -76,6 +76,6 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
     case Access(e, field):
       return formatExpr(e, ctx).wrap(sql -> ctx.formatAccess(sql, field));
     case Query(cursor):
-      return ctx.formatCursor(cursor).wrap(sql -> '($sql)');
+      return ctx.formatCursor(cursor).wrap(sql -> '(select $sql)');
   }
 }

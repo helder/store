@@ -33,8 +33,8 @@ function fieldFromType(type: Type) {
       name: 'Selection'
     }, [t]):
       return t.toComplexType();
-    default:
-      return (macro: Dynamic);
+    case t:
+      return t.toComplexType();
   }
 }
 

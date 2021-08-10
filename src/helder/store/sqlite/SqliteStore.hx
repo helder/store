@@ -46,15 +46,17 @@ class SqliteStore implements Store {
     this.db.exec('PRAGMA optimize');
   }
 
-  public function all<Row>(cursor: Cursor<Row>): Array<Row> {
+  public function all<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Array<Row> {
     final stmt = formatCursorSelect(cursor, context);
+    if (options != null && options.debug)
+      trace(stmt.sql);
     return prepare(stmt.sql)
       .all(stmt.params)
       .map((col: String) -> haxe.Json.parse(col));
   }
 
-  public function first<Row>(cursor: Cursor<Row>): Null<Row> {
-    return all(cursor.take(1))[0];
+  public function first<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Null<Row> {
+    return all(cursor.take(1), options)[0];
   }
 
   public function delete<Row>(cursor: Cursor<Row>): {changes: Int} {

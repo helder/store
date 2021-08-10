@@ -1,7 +1,7 @@
 package helder.store;
 
 import haxe.DynamicAccess;
-import helder.store.Collection.CollectionImpl;
+import helder.store.Collection.CollectionOf;
 import helder.store.Expression.ExpressionImpl;
 
 @:using(helder.store.Selection)
@@ -39,7 +39,7 @@ abstract Selection<T>(Select<T>) from Select<T> {
   }
 
   @:noUsing
-  public static function fieldsOf<T:{}>(collection: CollectionImpl<T>): Selection<T> {
+  public static function fieldsOf<T:{}>(collection: CollectionOf<T>): Selection<T> {
     return new Selection(FieldsOf(collection.alias));
   }
   

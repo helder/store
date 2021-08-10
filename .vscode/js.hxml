@@ -1,3 +1,4 @@
-base.hxml
+tests.hxml
+-lib hxnodejs
 --js dummy
 --no-output
