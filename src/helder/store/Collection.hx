@@ -34,6 +34,7 @@ final ESCollection = js.Syntax.code('
 #end
 
 @:forward
+@:native('C')
 abstract Collection<T:{}>(CollectionImpl<T>) to CollectionImpl<T> {
   inline public function new(name: String, ?options: {?alias: String}) {
     final inst = new CollectionImpl<T>(name, options);
