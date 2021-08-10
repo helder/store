@@ -15,7 +15,7 @@ interface Store {
   function first<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Null<Row>;
   function delete<Row>(cursor: Cursor<Row>): {changes: Int};
   function count<Row>(cursor: Cursor<Row>): Int;
-  function insert<Row:Document, @genes.type('test') In:{?id: String} & Row>(
+  function insert<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
     object: IdLess<In>
   ): Row;
