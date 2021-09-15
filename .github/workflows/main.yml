@@ -10,7 +10,8 @@ jobs:
     - uses: c-hive/gha-yarn-cache@v1
     - uses: actions/setup-node@v1
       with:
-        node-version: '15.x'
+        node-version: '16.x'
+        registry-url: 'https://registry.npmjs.org'
     - uses: shivammathur/setup-php@v2
       with:
         php-version: '7.4'
