@@ -1,6 +1,6 @@
 {
   "name": "helder.store",
-  "version": "0.0.0",
+  "version": "0.0.0-alpha.1",
   "license": "MIT",
   "module": "./dist/esm/index.js",
   "main": "./dist/cjs/index.js",
@@ -19,7 +19,9 @@
       ]
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "prepare": "lix download && symlink-dir . node_modules/helder.store",
     "test": "cross-env ANSICON=true lix run travix run",
