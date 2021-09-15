@@ -200,7 +200,6 @@ class ExpressionImpl<T> {
   public function is(that: EV<T>): Expression<Bool> {
     return new Expression(BinOp(Equals, expr, toExpr(that)));
   }
-
   public function isNot(that: EV<T>): Expression<Bool> {
     return new Expression(BinOp(NotEquals, expr, toExpr(that)));
   }
@@ -209,6 +208,12 @@ class ExpressionImpl<T> {
   }
   public function isNotIn(that: Either<EV<Array<T>>, Cursor<Any>>): Expression<Bool> {
     return new Expression(BinOp(NotIn, expr, toExpr(that)));
+  }
+  public function isNull(): Expression<Bool> {
+    return new Expression(UnOp(IsNull, expr));
+  }
+  public function isNotNull(): Expression<Bool> {
+    return new Expression(UnOp(Not, UnOp(IsNull, expr)));
   }
   public function add<T:Float>(that: EV<T>): Expression<T> {
     return new Expression(BinOp(Add, expr, toExpr(that)));
