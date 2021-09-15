@@ -42,11 +42,12 @@ enum Expr {
 
 typedef EV<T> = Either<Expression<T>, T>;
 
-function toExpr<T>(ev: Null<EV<T>>): Expr {
+function toExpr<T>(ev: Null<Either<EV<T>, Cursor<T>>>): Expr {
   return 
     if (ev == null) return Value(null);
     else if (ev is ExpressionImpl) (cast ev).expr
     else if (ev is Expr) (cast ev: Expr) 
+    else if (ev is Cursor) Query(ev)
     else Value((cast ev: T));
 }
 
@@ -60,7 +61,7 @@ private function isConstant(e: Expr, value: Any) {
 
 @:forward
 abstract Expression<T>(ExpressionImpl<T>) {
-  public function new(expr: Expr) {
+  inline public function new(expr: Expr) {
     final inst = new ExpressionImpl<T>(expr);
     this = 
       #if js new helder.store.util.RuntimeProxy(inst, inst.get)
@@ -73,84 +74,87 @@ abstract Expression<T>(ExpressionImpl<T>) {
     return helder.store.macro.Expression.getProp(expr, property);
     #end
   }
-  // @:forwardStatics prevents one from importing statics with wildcard...
-  public static function value(value: Any) {
+  
+  inline public static function value(value: Any) {
     return ExpressionImpl.value(value);
   }
 
-  public static function field(...path: String) {
+  inline public static function field(...path: String) {
     return ExpressionImpl.field(path.toArray());
   }
 
-  @:op(a in b) static function isIn<T>(a:Expression<T>, b:Expression<Array<T>>):Expression<Bool>
+  @:op(a in b) inline static function isIn<T>(a:Expression<T>, b:Expression<Array<T>>):Expression<Bool>
     return a.isIn(b);
 
-  @:op(a + b) static function add<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>
+  @:op(a in b) inline static function inCursor<T>(a:Expression<T>, b:Cursor<T>):Expression<Bool>
+    return a.isIn(b);
+
+  @:op(a + b) inline static function add<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>
     return a.add(b);
 
-  @:op(a - b) static function substract<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>
+  @:op(a - b) inline static function substract<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>
     return a.substract(b);
 
-  @:op(a * b) static function multiply<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>
+  @:op(a * b) inline static function multiply<T:Float>(a:Expression<T>, b:Expression<T>):Expression<T>
     return a.multiply(b);
 
-  @:op(a / b) static function divide<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Float>
+  @:op(a / b) inline static function divide<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Float>
     return a.divide(b);
 
-  @:op(a in b) static function isInC<T>(a:Expression<T>, b:Array<T>):Expression<Bool>
+  @:op(a in b) inline static function isInC<T>(a:Expression<T>, b:Array<T>):Expression<Bool>
     return a.isIn(b);
 
-  @:op(a == b) static function eq<T>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+  @:op(a == b) inline static function eq<T>(a:Expression<T>, b:Expression<T>):Expression<Bool>
     return a.is(b);
 
-  @:op(a != b) static function neq<T>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+  @:op(a != b) inline static function neq<T>(a:Expression<T>, b:Expression<T>):Expression<Bool>
     return a.is(b).not();
 
-  @:op(a > b) static function gt<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+  @:op(a > b) inline static function gt<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
     return a.greater(b);
 
-  @:op(a < b) static function lt<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+  @:op(a < b) inline static function lt<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
     return a.less(b);
 
-  @:op(a >= b) static function gte<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+  @:op(a >= b) inline static function gte<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
     return a.greaterOrEqual(b);
 
-  @:op(a <= b) static function lte<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
+  @:op(a <= b) inline static function lte<T:Float>(a:Expression<T>, b:Expression<T>):Expression<Bool>
     return a.lessOrEqual(b);
 
-  @:op(!a) static function not(c:Expression<Bool>):Expression<Bool>
+  @:op(!a) inline static function not(c:Expression<Bool>):Expression<Bool>
     return c.not();
 
-  @:op(a && b) static function and(a:Expression<Bool>, b:Expression<Bool>):Expression<Bool>
+  @:op(a && b) inline static function and(a:Expression<Bool>, b:Expression<Bool>):Expression<Bool>
     return a.and(b);
 
-  @:op(a || b) static function or(a:Expression<Bool>, b:Expression<Bool>):Expression<Bool>
+  @:op(a || b) inline static function or(a:Expression<Bool>, b:Expression<Bool>):Expression<Bool>
     return a.or(b);
 
-  @:op(a || b) static function constOr(a:Bool, b:Expression<Bool>):Expression<Bool>
+  @:op(a || b) inline static function constOr(a:Bool, b:Expression<Bool>):Expression<Bool>
     return b.or(a);
 
-  @:op(a || b) static function orConst(a:Expression<Bool>, b:Bool):Expression<Bool>
+  @:op(a || b) inline static function orConst(a:Expression<Bool>, b:Bool):Expression<Bool>
     return a.or(b);
 
   @:commutative
-  @:op(a == b) static function eqC<T>(a:Expression<T>, b:T):Expression<Bool>
+  @:op(a == b) inline static function eqC<T>(a:Expression<T>, b:T):Expression<Bool>
     return a.is(b);
 
   @:commutative
-  @:op(a != b) static function neqC<T>(a:Expression<T>, b:T):Expression<Bool>
+  @:op(a != b) inline static function neqC<T>(a:Expression<T>, b:T):Expression<Bool>
     return a.is(b).not();
 
-  @:op(a > b) static function gtConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
+  @:op(a > b) inline static function gtConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
     return a.greater(b);
 
-  @:op(a < b) static function ltConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
+  @:op(a < b) inline static function ltConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
     return a.less(b);
 
-  @:op(a >= b) static function gteConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
+  @:op(a >= b) inline static function gteConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
     return a.greaterOrEqual(b);
 
-  @:op(a <= b) static function lteConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
+  @:op(a <= b) inline static function lteConst<T:Float>(a:Expression<T>, b:T):Expression<Bool>
     return a.lessOrEqual(b);
 }
 

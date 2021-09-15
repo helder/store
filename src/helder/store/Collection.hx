@@ -12,14 +12,14 @@ typedef UnionToIntersection<U> = Dynamic;
 ')
 typedef FieldsOf<Row> = Dynamic;
 
-@:genes.type('CollectionImpl<Row> & UnionToIntersection<FieldsOf<Row>>')
+@:genes.type('CollectionOf<Row> & UnionToIntersection<FieldsOf<Row>>')
 typedef TSCollection<Row> = Dynamic;
 
 @:expose
 @:native('Collection')
 @:genes.type('{new<Row extends {}>(name: string, options?: {}): TSCollection<Row>}')
 final ESCollection = js.Syntax.code('
-  class Collection extends CollectionImpl {
+  class Collection extends CollectionOf {
     constructor(name, options) {
       super(name, options);
       return new Proxy(this, {
@@ -34,9 +34,9 @@ final ESCollection = js.Syntax.code('
 #end
 
 @:forward
-abstract Collection<T:{}>(CollectionImpl<T>) to CollectionImpl<T> {
+abstract Collection<T:{}>(CollectionOf<T>) to CollectionOf<T> from CollectionOf<T> {
   inline public function new(name: String, ?options: {?alias: String}) {
-    final inst = new CollectionImpl<T>(name, options);
+    final inst = new CollectionOf<T>(name, options);
     this = 
       #if js new helder.store.util.RuntimeProxy(inst, inst.get)
       #else inst #end;
@@ -50,7 +50,7 @@ abstract Collection<T:{}>(CollectionImpl<T>) to CollectionImpl<T> {
   }
 }
 
-class CollectionImpl<Row:{}> extends Cursor<Row> {
+class CollectionOf<Row:{}> extends Cursor<Row> {
   public var id(get, never): Expression<String>;
   public var alias(get, never): String;
   public var fields(get, never): Selection<Row>;

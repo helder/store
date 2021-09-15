@@ -33,7 +33,7 @@ function formatSelection<T>(selection: Null<Selection<T>>, ctx: FormatExprContex
         '(select json_group_array(json(res)) from (select $sql))'
       );
     case Expression(e): formatExpr(e.expr, ctx);
-    case FieldsOf(source, with): 
+    case FieldsOf(source, with):
       var target = 'json(${ctx.escapeId(source)}.`data`)';
       if (with == null) target;
       else formatSelection(with, ctx).wrap(sql -> 'json_patch($target, $sql)');
