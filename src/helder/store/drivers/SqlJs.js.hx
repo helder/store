@@ -9,7 +9,6 @@ import SqlJs as SqlJsLib;
 @:genes.type("typeof import('sql.js').Database")
 extern class Database extends sql_js.Database {}
 
-@:expose
 class SqlJs implements Driver {
   final db: Database;
   private static var transactionId = 0;

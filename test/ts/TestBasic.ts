@@ -1,4 +1,5 @@
-import {BetterSqlite3, Collection, SqliteStore} from 'helder.store'
+import {Collection, SqliteStore} from 'helder.store'
+import {BetterSqlite3} from 'helder.store/drivers/BetterSqlite3'
 import {test} from 'uvu'
 import * as assert from 'uvu/assert'
 

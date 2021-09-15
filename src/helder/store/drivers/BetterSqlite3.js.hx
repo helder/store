@@ -4,7 +4,6 @@ import helder.store.Driver;
 import better_sqlite3.Database;
 import BetterSqlite3 as BSQL3;
 
-@:expose
 class BetterSqlite3 implements Driver {
   final db: Database;
   public function new(file: String = ':memory:', ?options: DriverOptions)
