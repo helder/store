@@ -6,7 +6,7 @@ import BetterSqlite3 as BSQL3;
 
 @:expose
 class BetterSqlite3 implements Driver {
-  final db: Database;
+  @:genes.type("typeof import('better-sqlite3')") final db: Database;
   public function new(file: String = ':memory:', ?options: DriverOptions)
     db = BSQL3.call(file, (cast options: better_sqlite3.Options));
   public function exec(sql: String)

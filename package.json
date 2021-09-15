@@ -11,10 +11,15 @@
   "typings": "./dist/esm/index.d.ts",
   "typesVersions": {
     "*": {
-      "dist/esm/index.d.ts": [ "./dist/esm/index.d.ts" ],
-      "*": [ "./dist/esm/helder/store/*" ]
+      "dist/esm/index.d.ts": [
+        "./dist/esm/index.d.ts"
+      ],
+      "*": [
+        "./dist/esm/helder/store/*"
+      ]
     }
   },
+  "files": ["dist"],
   "scripts": {
     "prepare": "lix download && symlink-dir . node_modules/helder.store",
     "test": "cross-env ANSICON=true lix run travix run",
@@ -29,7 +34,7 @@
     "dev-null-cli": "^1.0.0",
     "dts2hx": "^0.15.3",
     "esm": "^3.2.25",
-    "lix": "^15.10.1",
+    "lix": "^15.11.4",
     "sql.js": "^1.5.0",
     "symlink-dir": "^5.0.0",
     "ts-node": "^9.1.1",
@@ -37,6 +42,6 @@
     "uvu": "^0.4.1"
   },
   "dependencies": {
-    "helder.std": "4.2.1-0.2.0"
+    "helder.std": "4.2.3-0.2.0"
   }
 }

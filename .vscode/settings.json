@@ -1,7 +1,8 @@
 {
   "haxe.configurations": [
     [".vscode/js.hxml"],
-    [".vscode/php.hxml"]
+    [".vscode/php.hxml"],
+    [".vscode/scripts.hxml"]
   ],
   "editor.insertSpaces": true,
   "haxe.executable": {

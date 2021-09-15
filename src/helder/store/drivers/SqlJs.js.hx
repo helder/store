@@ -6,6 +6,7 @@ import sql_js.Statement as SqlJsStatement;
 import SqlJs as SqlJsLib;
 
 @:native('__sqlJs.Database')
+@:genes.type("typeof import('sql.js').Database")
 extern class Database extends sql_js.Database {}
 
 @:expose

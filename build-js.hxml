@@ -3,11 +3,16 @@ base.hxml
 -lib genes
 -D dts
 -D js-source-map
+-D source_map_content
+-D analyzer-optimize
 -dce full
 helder.Store
 helder.store
 helder.store.drivers.BetterSqlite3
 helder.store.drivers.SqlJs
 --macro keep('helder.store')
+--macro addMetadata("@:native('Expression_Impl_')", 'helder.store.Expression')
+--macro addMetadata("@:native('Collection_Impl_')", 'helder.store.Collection')
 -js dist/esm/index.js
 --cmd tsc | dev-null
+--cmd lix --run scripts.CleanDist

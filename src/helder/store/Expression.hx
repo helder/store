@@ -57,6 +57,7 @@ private function isConstant(e: Expr, value: Any) {
   }
 }
 
+
 @:forward
 abstract Expression<T>(ExpressionImpl<T>) {
   public function new(expr: Expr) {
