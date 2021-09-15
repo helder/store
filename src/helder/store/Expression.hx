@@ -61,7 +61,7 @@ private function isConstant(e: Expr, value: Any) {
 
 @:forward
 abstract Expression<T>(ExpressionImpl<T>) {
-  inline public function new(expr: Expr) {
+  public function new(expr: Expr) {
     final inst = new ExpressionImpl<T>(expr);
     this = 
       #if js new helder.store.util.RuntimeProxy(inst, inst.get)

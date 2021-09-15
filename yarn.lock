@@ -341,11 +341,6 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-helder.std@4.2.3-0.2.0:
-  version "4.2.3-0.2.0"
-  resolved "https://registry.yarnpkg.com/helder.std/-/helder.std-4.2.3-0.2.0.tgz#f07d89a2668be11a8313ee65e4e8c3f136ffa7ea"
-  integrity sha512-dPbNyimeKvc9tT3R9pnc7bnK+W8EGelsq5N8eQE7DB/K+92ap6EJo0pslZRkIv4lcId5sbdJ8ufYBAKnLH5EiQ==
-
 hosted-git-info@^2.1.4:
   version "2.8.9"
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.9.tgz#dffc0bf9a21c02209090f2aa69429e1414daf3f9"
