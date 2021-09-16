@@ -14,12 +14,12 @@ import helder.store.FormatCursor.FormatCursorContext;
 import helder.Store;
 import tink.Anon.merge;
 
-function formatField(path: Array<String>) {
+function formatField(path: Array<String>, shallow = false) {
   return switch path {
     case []: throw 'assert';
     case [from]: escapeId(from);
     default: 
-      final target = escapeId(path[0]) + '.' + escapeId(path[1]);
+      final target = (shallow ? [path[1]] : [path[0], path[1]]).map(escapeId).join('.');
       if (path.length == 2) return target;
       final rest = "$." + path.slice(2).join('.');
       'json_extract($target, ${escape(rest)})';
@@ -30,7 +30,7 @@ final context: FormatCursorContext = {
   formatInline: false,
   formatSubject: (selection) -> selection,
   formatAccess: (on, field) -> 'json_extract(${on}, \'$.${field}\')',
-  formatField: formatField,
+  formatField: path -> formatField(path),
   formatUnwrapArray: sql -> '(select value from json_each($sql))',
   escape: escape,
   escapeId: escapeId
@@ -119,7 +119,8 @@ class SqliteStore implements Store {
     for (expr in on) {
       final stmt = formatExpr(toExpr(expr), merge(context, {
         formatInline: true,
-        formatCursor: cursor -> throw 'assert'
+        formatCursor: cursor -> throw 'assert',
+        formatField: path -> formatField(path, true)
       }));
       if (stmt.params.length > 0) {
         throw 'Parameters in index expressions are currently unsupported';
