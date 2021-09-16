@@ -32,6 +32,17 @@ final TestBasic = dbSuite(test -> {
     assert.is(gt10.prop, 20);
   });
 
+  test('Select', () -> {
+    final db = new Store();
+    final Test = new Collection<{id: String, propA: Int, propB: Int}>('test');
+    final a = {propA: 10, propB: 5}
+    final b = {propA: 20, propB: 5}
+    db.insertAll(Test, [a, b]);
+    final res = db.all(Test.select({a: Test.propA, b: Test.propB}));
+    assert.equal(res, [{a: 10, b: 5}, {a: 20, b: 5}]);
+    assert.is(db.first(Test.select(Test.propA)), 10);
+  });
+
   test('Limit', () -> {
     final db = new Store();
     final Test = new Collection<{id: String, prop: Int}>('test');

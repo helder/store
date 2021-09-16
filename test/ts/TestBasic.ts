@@ -36,4 +36,14 @@ test('filters', () => {
   assert.equal(gt10.prop, 20)
 })
 
+test('select', () => {
+  const db = store()
+  const Test = new Collection<typeof a>('test')
+  const a = {propA: 10, propB: 5}
+  const b = {propA: 20, propB: 5}
+  db.insertAll(Test, [a, b])
+  const res = db.all(Test.select({a: Test.propA, b: Test.propB}))
+  assert.equal(res, [{a: 10, b: 5}, {a: 20, b: 5}])
+})
+
 test.run()

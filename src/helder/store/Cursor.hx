@@ -13,6 +13,24 @@ class CursorImpl<Row> {
   public var orderBy(default, null): Null<Array<OrderBy>> = null;
 }
 
+@:genes.type('
+  | Expression<any>
+  | Select<any>
+  | {[key: string]: TSSelect | Cursor<any>}
+')
+typedef TSSelect = {};
+
+@:genes.type('
+  T extends Select<infer K> ? K :
+  T extends CursorSingleRow<infer K> ? K :
+  T extends Cursor<infer K> ? Array<K> :
+  T extends Expression<infer K> ? K :
+  T extends {[key: string]: TSSelect | Cursor<any>} 
+    ? {[K in keyof T]: TypeOfValue<T[K]>}
+    : any
+')
+typedef TypeOfValue<T> = T;
+
 @:expose
 class Cursor<Row> {
   public final cursor: CursorImpl<Row>;
@@ -62,8 +80,14 @@ class Cursor<Row> {
     );
   }
   
+  #if (genes && js) 
+  @:native('select') 
+  @:genes.type('<T extends TSSelect>(select: T) => Cursor<TypeOfValue<T>>')
+  public final select__ = js.Syntax.code('this.select__');
+  @:native('select__')
+  #end
   public function select<T>(select: Selection<T>): Cursor<T> {
-    return cast with(cursor, c -> c.select = cast select);
+    return cast with(cursor, c -> c.select = cast Selection.create(select));
   }
 
   public function orderBy(orderBy: Array<OrderBy>) {
