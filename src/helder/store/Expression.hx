@@ -197,11 +197,13 @@ class ExpressionImpl<T> {
   }
   static final NULL = Expr.Value(null);
   public function is(that: EV<T>): Expression<Bool> {
-    if (that == null || NULL.equals((that: Expression<T>).expr)) return isNull();
+    if (that == null || that is ExpressionImpl && NULL.equals((that: Expression<T>).expr))
+      return isNull();
     return new Expression(BinOp(Equals, expr, toExpr(that)));
   }
   public function isNot(that: EV<T>): Expression<Bool> {
-    if (that == null || NULL.equals((that: Expression<T>).expr)) return isNotNull();
+    if (that == null || that is ExpressionImpl && NULL.equals((that: Expression<T>).expr))
+      return isNotNull();
     return new Expression(BinOp(NotEquals, expr, toExpr(that)));
   }
   public function isIn(that: Either<EV<Array<T>>, Cursor<Any>>): Expression<Bool> {
