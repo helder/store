@@ -58,7 +58,6 @@ private function isConstant(e: Expr, value: Any) {
   }
 }
 
-
 @:forward
 abstract Expression<T>(ExpressionImpl<T>) {
   public function new(expr: Expr) {
@@ -75,7 +74,7 @@ abstract Expression<T>(ExpressionImpl<T>) {
     #end
   }
   
-  inline public static function value(value: Any) {
+  inline public static function value<T>(value: T) {
     return ExpressionImpl.value(value);
   }
 
@@ -196,11 +195,13 @@ class ExpressionImpl<T> {
     if (isConstant(b, false)) return new Expression(cast b);
     return new Expression(BinOp(And, a, b));
   }
-
+  static final NULL = Expr.Value(null);
   public function is(that: EV<T>): Expression<Bool> {
+    if (that == null || NULL.equals((that: Expression<T>).expr)) return isNull();
     return new Expression(BinOp(Equals, expr, toExpr(that)));
   }
   public function isNot(that: EV<T>): Expression<Bool> {
+    if (that == null || NULL.equals((that: Expression<T>).expr)) return isNotNull();
     return new Expression(BinOp(NotEquals, expr, toExpr(that)));
   }
   public function isIn(that: Either<EV<Array<T>>, Cursor<Any>>): Expression<Bool> {
@@ -283,8 +284,8 @@ class ExpressionImpl<T> {
   }
   #end
 
-  public static function value(value: Any) {
-    return new Expression(Value(value));
+  public static function value<T>(value: T): Expression<T> {
+    return new Expression<T>(Value(value));
   }
   public static function field(path: Array<String>) {
     return new Expression(Field(path));

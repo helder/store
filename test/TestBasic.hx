@@ -7,7 +7,7 @@ final TestBasic = dbSuite(test -> {
 
   test('Basic', () -> {
     final db = new Store();
-    final Node = new Collection<{id: String, index: Int}>('node');
+    final Node = new Collection<{id: String, index: Int, ?empty: String}>('node');
     final amount = 10;
     final objects = [for (i in 0 ... amount) {index: i}];
     assert.is(objects.length, amount);
@@ -19,6 +19,13 @@ final TestBasic = dbSuite(test -> {
         Node.where(Node.index >= amount - 1 && Node.index < amount)
       ).id,
       id
+    );
+    assert.is(db.first(Node.where(Node.empty.is(null))).id, stored[0].id);
+    assert.is(
+      db.first(Node.where(Node.empty.is(
+        Expression.value(null)
+      ))).id, 
+      stored[0].id
     );
   });
 
