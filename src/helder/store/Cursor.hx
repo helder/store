@@ -83,8 +83,8 @@ class Cursor<Row> {
   #if (genes && js) 
   @:native('select') 
   @:genes.type('<T extends TSSelect>(select: T) => Cursor<TypeOfValue<T>>')
-  public final select__ = js.Syntax.code('this.select__');
-  @:native('select__')
+  public final __select = js.Syntax.code('this.__select');
+  @:native('__select')
   #end
   public function select<T>(select: Selection<T>): Cursor<T> {
     return cast with(cursor, c -> c.select = cast Selection.create(select));

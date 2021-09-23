@@ -89,6 +89,12 @@ class CollectionOf<Row:{}> extends Cursor<Row> {
     return cast get('id');
   }
 
+  #if (genes && js) 
+  @:native('as') 
+  @:genes.type('(name: string) => TSCollection<Row>')
+  public final __as = js.Syntax.code('this.__as');
+  @:native('__as')
+  #end
   public function as(name: String): Collection<Row> {
     return new Collection<Row>(
       switch cursor.from {
