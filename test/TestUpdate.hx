@@ -4,8 +4,9 @@ import test.DbSuite.dbSuite;
 
 final TestUpdate = dbSuite(test -> {
 
+  final db = new Store();
+
   test('Update', () -> {
-    final db = new Store();
     final user = db.insert(User, {
       name: {
         given: 'abc', 
@@ -30,6 +31,25 @@ final TestUpdate = dbSuite(test -> {
     });
     assert.is(res3.changes, 1);
     assert.is(db.first(User).name.given, 'def');
+  });
+
+  test('Update object', () -> {
+    final user = db.insert(User, {
+      name: {
+        given: 'abc', 
+        last: 'test'
+      }
+    });
+    final res = db.update(User.where(User.id == user.id), {
+      name: {
+        given: '123', 
+        last: '456'
+      }
+    });
+    assert.is(res.changes, 1);
+    final user2 = db.first(User.where(User.id == user.id));
+    assert.is(user2.name.given, '123');
+    assert.is(user2.name.last, '456');
   });
 
 });

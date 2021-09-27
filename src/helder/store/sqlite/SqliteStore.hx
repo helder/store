@@ -48,31 +48,36 @@ class SqliteStore implements Store {
 
   public function all<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Array<Row> {
     final stmt = formatCursorSelect(cursor, context);
-    if (options != null && options.debug)
-      trace(stmt.sql);
-    return prepare(stmt.sql)
+    return prepare(stmt.sql, options)
       .all(stmt.params)
       .map((col: String) -> haxe.Json.parse(col));
   }
 
-  public function first<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Null<Row> {
+  public function first<Row>(
+    cursor: Cursor<Row>, 
+    ?options: QueryOptions
+  ): Null<Row> {
     return all(cursor.take(1), options)[0];
   }
 
-  public function delete<Row>(cursor: Cursor<Row>): {changes: Int} {
+  public function delete<Row>(
+    cursor: Cursor<Row>,
+    ?options: QueryOptions
+  ): {changes: Int} {
     final stmt = formatCursorDelete(cursor, context);
-    return prepare(stmt.sql).run(stmt.params);
+    return prepare(stmt.sql, options).run(stmt.params);
   }
 
-  public function count<Row>(cursor: Cursor<Row>): Int {
+  public function count<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Int {
     final stmt = formatCursorSelect(cursor, context);
-    return prepare('select count() from (${stmt.sql})')
+    return prepare('select count() from (${stmt.sql})', options)
       .get(stmt.params);
   }
   
   public function insertAll<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
-    objects: Array<IdLess<In>>
+    objects: Array<IdLess<In>>, 
+    ?options: QueryOptions
   ): Array<Row> {
     return db.transaction(() -> {
       final table = escapeId(switch collection.cursor.from {
@@ -82,7 +87,7 @@ class SqliteStore implements Store {
       return objects.map(document -> {
         final res: Row = cast document;
         if (res.id == null) res.id = Uuid.nanoId();
-        prepare('insert into ${table} values (?)').run(
+        prepare('insert into ${table} values (?)', options).run(
           [Json.stringify(res)]
         );
         return res;
@@ -92,15 +97,16 @@ class SqliteStore implements Store {
 
   public function insert<Row:Document, In:{?id: String} & Row>(
     collection: Collection<Row>, 
-    object: IdLess<In>
+    object: IdLess<In>, 
+    ?options: QueryOptions
   ): Row {
-    return insertAll(collection, [object])[0];
+    return insertAll(collection, [object], options)[0];
   }
 
-  public function update<Row>(cursor: Cursor<Row>, update: Update<Row>): {changes: Int} {
+  public function update<Row>(cursor: Cursor<Row>, update: Update<Row>, ?options: QueryOptions): {changes: Int} {
     return db.transaction(() -> {
       final stmt = formatCursorUpdate(cursor, update, context);
-      return prepare(stmt.sql)
+      return prepare(stmt.sql, options)
         .run(stmt.params);
     });
   }
@@ -137,8 +143,9 @@ class SqliteStore implements Store {
     return db.transaction(run);
   }
 
-  function prepare(query: String): PreparedStatement {
-    // trace(query);
+  function prepare(query: String, ?options: QueryOptions): PreparedStatement {
+    if (options != null && options.debug)
+      trace(query);
     return createOnError(() -> db.prepare(query));
   }
 
