@@ -27,7 +27,8 @@ final binOps: Map<BinOp, String> = [
 ];
 
 typedef FormatExprContext = FormatCursorContext & {
-  formatCursor: (cursor: Cursor<Any>) -> Statement
+  formatCursor: (cursor: Cursor<Any>) -> Statement,
+  formatAsJsonValue: Bool
 }
 
 function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
@@ -51,8 +52,10 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
         return 'null';
       if (value is Bool)
         return if (value) '1' else '0';
-      if (value is Array)
-        return '(${(cast value: Array<Any>).map(ctx.escape).join(', ')})';
+      if (value is Array) {
+        final res = '(${(cast value: Array<Any>).map(ctx.escape).join(', ')})';
+        return if (ctx.formatAsJsonValue) 'json_array$res' else res;
+      }
       if (value is Int || value is Float || value is String)
         return 
           if (ctx.formatInline == true) ctx.escape(value)

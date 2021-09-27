@@ -95,7 +95,7 @@ function formatWhere(where: Null<Expression<Bool>>, ctx: FormatExprContext): Sta
 function formatUpdate<Row>(update: Update<Row>, ctx: FormatExprContext): Statement {
   var source: Statement = '`data`';
   @:nullSafety(Off) for (field => expr in update) {
-    final e = formatExpr(toExpr(expr), ctx);
+    final e = formatExpr(toExpr(expr), merge(ctx, {formatAsJsonValue: true}));
     source = 
       ('json_set(': Statement) +
         source +
@@ -112,6 +112,7 @@ private function formatCursor<Row>(
 ): Statement {
   final c = @:privateAccess cursor.cursor;
   final exprCtx: FormatExprContext = merge(ctx, {
+    formatAsJsonValue: false,
     formatCursor: cursor -> formatCursor(cursor, ctx)
   });
   final limit = if (c.limit != null || c.offset != null)
@@ -131,6 +132,7 @@ private function formatCursor<Row>(
 function formatCursorUpdate<Row>(cursor: Cursor<Row>, update: Update<Row>, ctx: FormatCursorContext) {
   final c = @:privateAccess cursor.cursor;
   final exprCtx: FormatExprContext = merge(ctx, {
+    formatAsJsonValue: false,
     formatCursor: cursor -> formatCursor(cursor, ctx)
   });
   final from = formatFrom(c.from, exprCtx);

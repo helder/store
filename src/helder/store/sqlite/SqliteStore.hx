@@ -125,6 +125,7 @@ class SqliteStore implements Store {
     for (expr in on) {
       final stmt = formatExpr(toExpr(expr), merge(context, {
         formatInline: true,
+        formatAsJsonValue: false,
         formatCursor: cursor -> throw 'assert',
         formatField: path -> formatField(path, true)
       }));

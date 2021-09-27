@@ -6,5 +6,6 @@ typedef User = {
     given: String,
     last: String
   },
-  ?email: String
+  ?email: String,
+  ?roles: Array<String>
 }

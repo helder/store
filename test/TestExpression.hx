@@ -8,6 +8,7 @@ import helder.store.Expression.*;
 
 final ctx: FormatExprContext = {
   formatInline: true,
+  formatAsJsonValue: false,
   formatSubject: selection -> selection,
   formatAccess: (on, field) -> '${on}.${field}',
   formatUnwrapArray: sql -> sql,
