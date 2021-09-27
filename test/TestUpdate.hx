@@ -4,9 +4,8 @@ import test.DbSuite.dbSuite;
 
 final TestUpdate = dbSuite(test -> {
 
-  final db = new Store();
-
   test('Update', () -> {
+    final db = new Store();
     final user = db.insert(User, {
       name: {
         given: 'abc', 
@@ -34,6 +33,7 @@ final TestUpdate = dbSuite(test -> {
   });
 
   test('Update object', () -> {
+    final db = new Store();
     final user = db.insert(User, {
       name: {
         given: 'abc', 
