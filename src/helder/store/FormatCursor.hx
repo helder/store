@@ -6,6 +6,8 @@ import helder.store.FormatExpr.FormatExprContext;
 import helder.store.FormatExpr.formatExpr;
 import helder.store.Expression.ExpressionImpl;
 import helder.store.Cursor;
+using helder.store.Statement;
+using helder.store.util.Arrays;
 import tink.Anon.*;
 
 typedef FormatCursorContext = {
@@ -27,10 +29,13 @@ function formatSelection<T>(selection: Null<Selection<T>>, ctx: FormatExprContex
         '(select $sql)'
       );
     case Cursor(cursor):
+      final select = cursor.cursor.select;
+      final isJson = select == null || !(select.match(Expression(_)));
+      final res = if (isJson) 'json(res)' else 'res';
       formatCursor(cursor, merge(ctx, {
         formatSubject: (subject) -> subject.wrap(sql -> '$sql as res')
       })).wrap(sql -> 
-        '(select json_group_array(json(res)) from (select $sql))'
+        '(select json_group_array($res) from (select $sql))'
       );
     case Expression(e): formatExpr(e.expr, ctx);
     case FieldsOf(source, with):
@@ -38,16 +43,23 @@ function formatSelection<T>(selection: Null<Selection<T>>, ctx: FormatExprContex
       if (with == null) target;
       else formatSelection(with, ctx).wrap(sql -> 'json_patch($target, $sql)');
     case Fields(fields):
-      var res: Statement = '';
-      var i = 0;
-      var length = fields.keys().length;
-      @:nullSafety(Off) for (key => select in fields) {
-        res += 
-          formatSelection(select, ctx)
-            .wrap(sql -> '${ctx.escape(key)}, $sql');
-        if (i++ < length - 1) res += ',';
+      var res = Statement.EMPTY;
+      final chunks = [for (key in fields.keys()) key].chunk(50);
+      for (keys in chunks) {
+        var props = Statement.EMPTY;
+        var i = 0;
+        for (key in keys) {
+          final select = fields[key];
+          props += 
+            formatSelection(select, ctx)
+              .wrap(sql -> '${ctx.escape(key)}, $sql');
+          if (i++ < keys.length - 1) props += ',';
+        }
+        final object = props.wrap(sql -> 'json_object(${sql})');
+        if (res.isEmpty()) res = object;
+        else res = new Statement('json_patch(') + res + ', ' + object + ')';
       }
-      res.wrap(sql -> 'json_object($sql)');
+      res;
   }
 }
 
@@ -136,13 +148,13 @@ function formatCursorUpdate<Row>(cursor: Cursor<Row>, update: Update<Row>, ctx: 
   final from = formatFrom(c.from, exprCtx);
   final set = formatUpdate(update, exprCtx);
   final where = formatWhere(c.where, exprCtx);
-  return ('update': Statement) + from + set + 'where' + where;
+  return new Statement('update') + from + set + 'where' + where;
 }
 
 function formatCursorSelect<Row>(cursor: Cursor<Row>, ctx: FormatCursorContext) {
-  return ('select': Statement) + formatCursor(cursor, merge(ctx, {includeSelection: true}));
+  return new Statement('select') + formatCursor(cursor, merge(ctx, {includeSelection: true}));
 }
 
 function formatCursorDelete<Row>(cursor: Cursor<Row>, ctx: FormatCursorContext) {
-  return ('delete': Statement) + formatCursor(cursor, merge(ctx, {includeSelection: false}));
+  return new Statement('delete') + formatCursor(cursor, merge(ctx, {includeSelection: false}));
 }

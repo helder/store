@@ -20,11 +20,12 @@ final TestSubQueries = dbSuite(test -> {
             name: RoleAlias.name
           }).orderBy([RoleAlias.name.asc()])
         })
-      )
+      ),
+      {debug: true}
     );
-    assert.equal( 
-      [{name: 'role1'}, {name: 'role2'}],
-      bundled.roles
+    assert.equal(
+      bundled.roles,
+      [{name: 'role1'}, {name: 'role2'}]
     );
     final Entry = new Collection<{id: String}>('Entry');
     final Language = new Collection<{id: String, entry: String}>('Language');
@@ -46,7 +47,8 @@ final TestSubQueries = dbSuite(test -> {
             })
           )
         })
-      )
+      ),
+      {debug: true}
     );
     assert.equal(merge(entry, {
       languages: [

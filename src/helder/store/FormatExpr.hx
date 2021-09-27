@@ -1,5 +1,6 @@
 package helder.store;
 
+import helder.store.FormatCursor.formatSelection;
 import helder.store.FormatCursor.FormatCursorContext;
 import helder.store.Expression.BinOp;
 import helder.store.Expression.Expr;
@@ -76,6 +77,6 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
     case Access(e, field):
       return formatExpr(e, ctx).wrap(sql -> ctx.formatAccess(sql, field));
     case Query(cursor):
-      return ctx.formatCursor(cursor).wrap(sql -> '(select $sql)');
+      return formatSelection(Cursor(cursor), ctx);
   }
 }

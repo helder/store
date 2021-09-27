@@ -72,6 +72,14 @@ class Cursor<Row> {
     return new CursorSingleRow(take(1).cursor);
   }
 
+  public function subOne(): Expression<Row> {
+    return new Expression(Expr.Query(first()));
+  }
+
+  public function subAll(): Expression<Array<Row>> {
+    return new Expression(Expr.Query(this));
+  }
+
   public function where(where: Expression<Bool>): Cursor<Row> {
     return with(cursor, c -> 
       c.where = 
@@ -98,7 +106,11 @@ class Cursor<Row> {
   }
 }
 
-class CursorSingleRow<Row> extends Cursor<Row> {}
+class CursorSingleRow<Row> extends Cursor<Row> {
+  // Typescript will mark any Cursor<Row> as T extends CursorSingleRow<Row>
+  // unless the type has an actual difference in implementation
+  /** internal */ private final __bogus: Null<Dynamic> = null;
+}
 
 private inline function with<Row>(cursor: CursorImpl<Row>, mutate: (cursor: CursorImpl<Row>) -> Void) {
   final res: CursorImpl<Row> = {

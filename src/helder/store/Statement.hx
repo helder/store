@@ -20,9 +20,11 @@ class StatementImpl {
 
 @:forward
 abstract Statement(StatementImpl) {
-  public function new(sql: String, params: Array<Any>)
-    this = new StatementImpl(sql, params);
-  @:from public static function fromString(str: String) {
+  public static final EMPTY = new Statement('');
+  inline public function new(sql: String, ?params: Array<Any>) {
+    this = new StatementImpl(sql, if (params == null) [] else params);
+  }
+  @:from inline public static function fromString(str: String) {
     return new Statement(str, []);
   }
   @:op(a+b) public function add(that: Statement) {
@@ -30,5 +32,8 @@ abstract Statement(StatementImpl) {
       this.sql + ' ' + that.sql, 
       this.params.concat(that.params)
     );
+  }
+  inline public function isEmpty() {
+    return this.sql == '' && this.params.length == 0;
   }
 }
