@@ -1,5 +1,6 @@
 package helder.store.sqlite;
 
+import helder.store.Collection.GenericCollection;
 import helder.store.Expression.toExpr;
 import helder.store.FormatExpr.formatExpr;
 import helder.store.FormatCursor.formatCursorUpdate;
@@ -13,6 +14,8 @@ import uuid.Uuid;
 import helder.store.FormatCursor.FormatCursorContext;
 import helder.Store;
 import tink.Anon.merge;
+
+using Lambda;
 
 function formatField(path: Array<String>, shallow = false) {
   return switch path {
@@ -48,7 +51,7 @@ class SqliteStore implements Store {
 
   public function all<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Array<Row> {
     final stmt = formatCursorSelect(cursor, context);
-    return prepare(stmt.sql, options)
+    return prepare(cursor.cursor.collections, stmt.sql, options)
       .all(stmt.params)
       .map((col: String) -> haxe.Json.parse(col));
   }
@@ -65,12 +68,20 @@ class SqliteStore implements Store {
     ?options: QueryOptions
   ): {changes: Int} {
     final stmt = formatCursorDelete(cursor, context);
-    return prepare(stmt.sql, options).run(stmt.params);
+    return prepare(
+      cursor.cursor.collections, 
+      stmt.sql, 
+      options
+    ).run(stmt.params);
   }
 
   public function count<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Int {
     final stmt = formatCursorSelect(cursor, context);
-    return prepare('select count() from (${stmt.sql})', options)
+    return prepare(
+      cursor.cursor.collections, 
+      'select count() from (${stmt.sql})',
+      options
+    )
       .get(stmt.params);
   }
   
@@ -87,7 +98,7 @@ class SqliteStore implements Store {
       return objects.map(document -> {
         final res: Row = cast document;
         if (res.id == null) res.id = Uuid.nanoId();
-        prepare('insert into ${table} values (?)', options).run(
+        prepare([collection], 'insert into ${table} values (?)', options).run(
           [Json.stringify(res)]
         );
         return res;
@@ -106,7 +117,7 @@ class SqliteStore implements Store {
   public function update<Row>(cursor: Cursor<Row>, update: Update<Row>, ?options: QueryOptions): {changes: Int} {
     return db.transaction(() -> {
       final stmt = formatCursorUpdate(cursor, update, context);
-      return prepare(stmt.sql, options)
+      return prepare(cursor.cursor.collections, stmt.sql, options)
         .run(stmt.params);
     });
   }
@@ -137,20 +148,27 @@ class SqliteStore implements Store {
     final sql = 'create index if not exists ${escape(
       [tableName, name].join('.')
     )} on ${table}(${exprs.join(', ')});';
-    return createOnError(() -> db.exec(sql));
+    return createOnError([collection], () -> db.exec(sql));
   }
 
   public function transaction<T>(run: () -> T): T {
     return db.transaction(run);
   }
 
-  function prepare(query: String, ?options: QueryOptions): PreparedStatement {
+  function prepare(
+    collections: Iterable<GenericCollection>, 
+    query: String, 
+    ?options: QueryOptions
+  ): PreparedStatement {
     if (options != null && options.debug)
       trace(query);
-    return createOnError(() -> db.prepare(query));
+    return createOnError(collections, () -> db.prepare(query));
   }
 
-  function createOnError<T>(run: () -> T): T {
+  function createOnError<T>(
+    collections: Iterable<GenericCollection>, 
+    run: () -> T
+  ): T {
     function next(?retry: String): T {
       try return run()
       catch (e) {
@@ -159,7 +177,7 @@ class SqliteStore implements Store {
         if (index > -1) {
           final table = e.message.substr(index + NO_TABLE.length).split('.').pop();
           if (retry != table && table != null) {
-            createTable(table);
+            createTable(collections, table);
             return next(table);
           }
         }
@@ -169,12 +187,13 @@ class SqliteStore implements Store {
     return next();
   }
 
-  function createTable(name: String) {
-    db.exec('
-      create table if not exists ${escapeId(name)}(data json);
-      create index if not exists 
-        ${escape([name, 'id'].join('.'))} 
-        on ${escapeId(name)}(json_extract(data, \'$.id\'));
-    ');
+  function createTable(collections: Iterable<GenericCollection>, name: String) {
+    // Find out which collection we're trying to create
+    final collection = collections.find(coll -> {
+      return Collection.name(coll) == name;
+    });
+    if (collection == null) throw 'Cannot create "$name"';
+    db.exec('create table if not exists ${escapeId(name)}(data json);');
+    createIndex(collection, 'id', [collection.id]);
   }
 }

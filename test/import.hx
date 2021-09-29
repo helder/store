@@ -5,6 +5,7 @@ import helder.store.Expression;
 import helder.Unit.suite;
 import helder.Unit.assert;
 import tink.Anon.merge;
+import test.DbSuite;
 
 import test.db.*;
 import test.db.Schema.*;

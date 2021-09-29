@@ -1,6 +1,7 @@
 package helder.store;
 
 import helder.store.From;
+import helder.store.Collection;
 
 @:structInit 
 @:allow(helder.store.Cursor)
@@ -11,6 +12,8 @@ class CursorImpl<Row> {
   public var limit(default, null): Null<Int> = null;
   public var offset(default, null): Null<Int> = null;
   public var orderBy(default, null): Null<Array<OrderBy>> = null;
+
+  public var collections(default, null): Map<String, CollectionOf<Dynamic>>;
 }
 
 @:genes.type('
@@ -39,25 +42,27 @@ class Cursor<Row> {
     this.cursor = cursor;
 
   public function leftJoin<T>(that: Collection<Dynamic>, on: Expression<Bool>): Cursor<Row> {
-    return with(cursor, c -> 
+    return with(cursor, c -> {
+      c.collections.set(Collection.name(that), that);
       c.from = From.Join(
         this.cursor.from,
         that.cursor.from,
         JoinType.Left,
         on.expr
-      )
-    );
+      );
+    });
   }
 
   public function innerJoin(that: Collection<Dynamic>, on: Expression<Bool>): Cursor<Row> {
-    return with(cursor, c ->
+    return with(cursor, c -> {
+      c.collections.set(Collection.name(that), that);
       c.from = From.Join(
         this.cursor.from,
         that.cursor.from,
         JoinType.Inner,
         on.expr
-      )
-    );
+      );
+    });
   }
 
   public function take(limit: Int): Cursor<Row> {
@@ -107,8 +112,11 @@ private inline function with<Row>(cursor: CursorImpl<Row>, mutate: (cursor: Curs
     select: cursor.select,
     limit: cursor.limit,
     offset: cursor.offset,
-    orderBy: cursor.orderBy
+    orderBy: cursor.orderBy,
+    collections: new Map()
   }
+  for (key => value in  cursor.collections)
+    res.collections.set(key, value);
   mutate(res);
   return new Cursor<Row>(res);
 }

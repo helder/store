@@ -1,0 +1,14 @@
+package test;
+
+typedef T = {$id: String, id: String, prop: Int};
+
+final TestExtend = dbSuite(test -> {
+
+  test('Extend', () -> {
+    final db = new Store();
+    final T = new Collection<T>('T', {idColumn: "$id"});
+    db.insert(T, {prop: 1});
+    assert.is(db.first(T).prop, 1);
+  });
+
+});

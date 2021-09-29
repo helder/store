@@ -35,7 +35,7 @@ final ESCollection = js.Syntax.code('
 
 @:forward
 abstract Collection<T:{}>(CollectionOf<T>) to CollectionOf<T> from CollectionOf<T> {
-  inline public function new(name: String, ?options: {?alias: String}) {
+  inline public function new(name: String, ?options: CollectionOptions) {
     final inst = new CollectionOf<T>(name, options);
     this = 
       #if js new helder.store.util.RuntimeProxy(inst, inst.get)
@@ -48,14 +48,30 @@ abstract Collection<T:{}>(CollectionOf<T>) to CollectionOf<T> from CollectionOf<
     return helder.store.macro.Expression.getProp(expr, property);
     #end
   }
+
+  public static function name(collection: CollectionOf<Dynamic>): String {
+    return switch collection.cursor.from {
+      case Column(Table(name, _), _) | Table(name, _): name;
+      default: throw 'unexpected';
+    }
+  }
 }
 
+typedef CollectionOptions = {
+  ?idColumn: String,
+  ?alias: String
+}
+
+typedef GenericCollection = CollectionOf<Dynamic>;
+
 class CollectionOf<Row:{}> extends Cursor<Row> {
+  private final idColumn: String;
   public var id(get, never): Expression<String>;
   public var alias(get, never): String;
   public var fields(get, never): Selection<Row>;
 
-  public function new(name: String, ?options: {?alias: String}) {
+  public function new(name: String, ?options: CollectionOptions) {
+    final collections = new Map();
     super({
       from: Column(
         Table(
@@ -63,8 +79,13 @@ class CollectionOf<Row:{}> extends Cursor<Row> {
           if (options == null) null else options.alias
         ),
         'data'
-      )
+      ),
+      collections: collections
     });
+    idColumn = 
+      if (options == null || options.idColumn == null) 'id' 
+      else options.idColumn;
+    collections.set(name, this);
   }
 
   public function get<T>(name: String): Expression<T> {
@@ -86,7 +107,7 @@ class CollectionOf<Row:{}> extends Cursor<Row> {
   #end
 
   function get_id(): Expression<String> {
-    return cast get('id');
+    return cast get(idColumn);
   }
 
   #if (genes && js) 
