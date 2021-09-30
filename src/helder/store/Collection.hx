@@ -49,9 +49,17 @@ abstract Collection<T:{}>(CollectionOf<T>) to CollectionOf<T> from CollectionOf<
     #end
   }
 
-  public static function name(collection: CollectionOf<Dynamic>): String {
+  public static function getName(collection: CollectionOf<Dynamic>): String {
     return switch collection.cursor.from {
       case Column(Table(name, _), _) | Table(name, _): name;
+      default: throw 'unexpected';
+    }
+  }
+
+  public static function  getAlias(collection: CollectionOf<Dynamic>): String {
+    return switch collection.cursor.from {
+      case Column(Table(name, a), _) | Table(name, a): 
+        if (a != null) a else name;
       default: throw 'unexpected';
     }
   }
@@ -67,7 +75,6 @@ typedef GenericCollection = CollectionOf<Dynamic>;
 class CollectionOf<Row:{}> extends Cursor<Row> {
   private final idColumn: String;
   public var id(get, never): Expression<String>;
-  public var alias(get, never): String;
   public var fields(get, never): Selection<Row>;
 
   public function new(name: String, ?options: CollectionOptions) {
@@ -128,13 +135,5 @@ class CollectionOf<Row:{}> extends Cursor<Row> {
 
   function get_fields(): Selection<Row> {
     return Selection.fieldsOf(this);
-  }
-
-  function get_alias(): String {
-    return switch cursor.from {
-      case Column(Table(name, a), _) | Table(name, a): 
-        if (a != null) a else name;
-      default: throw 'unexpected';
-    }
   }
 }

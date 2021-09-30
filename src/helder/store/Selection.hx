@@ -40,7 +40,7 @@ abstract Selection<T>(Select<T>) from Select<T> {
 
   @:noUsing
   public static function fieldsOf<T:{}>(collection: CollectionOf<T>): Selection<T> {
-    return new Selection(FieldsOf(collection.alias));
+    return new Selection(FieldsOf(Collection.getAlias(collection)));
   }
   
   // Extern generic inline is useless, but forces the compiler to close

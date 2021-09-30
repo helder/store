@@ -43,7 +43,7 @@ class Cursor<Row> {
 
   public function leftJoin<T>(that: Collection<Dynamic>, on: Expression<Bool>): Cursor<Row> {
     return with(cursor, c -> {
-      c.collections.set(Collection.name(that), that);
+      c.collections.set(Collection.getName(that), that);
       c.from = From.Join(
         this.cursor.from,
         that.cursor.from,
@@ -55,7 +55,7 @@ class Cursor<Row> {
 
   public function innerJoin(that: Collection<Dynamic>, on: Expression<Bool>): Cursor<Row> {
     return with(cursor, c -> {
-      c.collections.set(Collection.name(that), that);
+      c.collections.set(Collection.getName(that), that);
       c.from = From.Join(
         this.cursor.from,
         that.cursor.from,

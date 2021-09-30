@@ -190,7 +190,7 @@ class SqliteStore implements Store {
   function createTable(collections: Iterable<GenericCollection>, name: String) {
     // Find out which collection we're trying to create
     final collection = collections.find(coll -> {
-      return Collection.name(coll) == name;
+      return Collection.getName(coll) == name;
     });
     if (collection == null) throw 'Cannot create "$name"';
     db.exec('create table if not exists ${escapeId(name)}(data json);');
