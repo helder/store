@@ -41,7 +41,9 @@ function fieldFromType(type: Type) {
 function create(expr: Expr) {
   final type = fieldFromType(Context.typeof(expr));
   return macro @:pos(expr.pos) (
-    helder.store.Selection.create($expr): 
+    new helder.store.Selection.SelectionImpl(
+      helder.store.Selection.SelectionImpl.create($expr)
+    ): 
     helder.store.Selection<$type>
   );
 }

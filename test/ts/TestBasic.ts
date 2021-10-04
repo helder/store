@@ -1,4 +1,4 @@
-import {Collection, SqliteStore} from 'helder.store'
+import {Collection, Expression, SqliteStore} from 'helder.store'
 import {BetterSqlite3} from 'helder.store/drivers/BetterSqlite3'
 import {test} from 'uvu'
 import * as assert from 'uvu/assert'
@@ -28,7 +28,7 @@ test('basic', () => {
 
 test('filters', () => {
   const db = store()
-  const Test = new Collection<typeof a>('test')
+  const Test = new Collection<typeof a & {id: string}>('test')
   const a = {prop: 10}
   const b = {prop: 20}
   db.insertAll(Test, [a, b])
@@ -38,12 +38,16 @@ test('filters', () => {
 
 test('select', () => {
   const db = store()
-  const Test = new Collection<typeof a>('test')
+  const Test = new Collection<typeof a & {id: string}>('test')
   const a = {propA: 10, propB: 5}
   const b = {propA: 20, propB: 5}
   db.insertAll(Test, [a, b])
   const res = db.all(Test.select({a: Test.propA, b: Test.propB}))
   assert.equal(res, [{a: 10, b: 5}, {a: 20, b: 5}])
+  const res2 = db.first(Test.select(Test.fields.with({
+    testProp: Expression.value(123)
+  })))
+  assert.is(res2.testProp, 123)
 })
 
 test.run()
