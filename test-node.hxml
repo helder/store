@@ -1,0 +1,4 @@
+-lib hxnodejs
+-lib helder.store
+tests.hxml
+-js bin/node/test.cjs

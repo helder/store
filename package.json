@@ -4,9 +4,10 @@
   "license": "MIT",
   "module": "./dist/esm/index.js",
   "main": "./dist/cjs/index.js",
+  "type": "module",
   "exports": {
     ".": "./dist/esm/index.js",
-    "./": "./dist/esm/helder/store/"
+    "./*": "./dist/esm/helder/store/*"
   },
   "typings": "./dist/esm/index.d.ts",
   "typesVersions": {
@@ -24,7 +25,9 @@
   ],
   "scripts": {
     "prepare": "lix download && symlink-dir . node_modules/helder.store",
-    "test": "cross-env ANSICON=true lix run travix run",
+    "test:node": "lix test-node.hxml && node bin/node/test.cjs",
+    "test:node:sqljs": "lix test-node.hxml -D sqljs && node bin/node/test.cjs",
+    "test:php": "lix test-php.hxml && php bin/php/index.php",
     "test:ts": "lix build-js.hxml && uvu -r ts-node/register test/ts",
     "build": "lix build-js.hxml"
   },
