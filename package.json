@@ -4,10 +4,15 @@
   "license": "MIT",
   "module": "./dist/esm/index.js",
   "main": "./dist/cjs/index.js",
-  "type": "module",
   "exports": {
-    ".": "./dist/esm/index.js",
-    "./*": "./dist/esm/helder/store/*"
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./*": {
+      "import": "./dist/esm/helder/store/*",
+      "require": "./dist/cjs/helder/store/*"
+    }
   },
   "typings": "./dist/esm/index.d.ts",
   "typesVersions": {
@@ -28,7 +33,7 @@
     "test:node": "lix test-node.hxml && node bin/node/test.cjs",
     "test:node:sqljs": "lix test-node.hxml -D sqljs && node bin/node/test.cjs",
     "test:php": "lix test-php.hxml && php bin/php/index.php",
-    "test:ts": "lix build-js.hxml && uvu -r ts-node/register test/ts",
+    "test:ts": "lix build-js.hxml && uvu -r tsm test/ts",
     "build": "lix build-js.hxml"
   },
   "devDependencies": {
@@ -42,7 +47,7 @@
     "lix": "^15.11.4",
     "sql.js": "^1.5.0",
     "symlink-dir": "^5.0.0",
-    "ts-node": "^9.1.1",
+    "tsm": "^2.1.0",
     "typescript": "^4.2.4",
     "uvu": "^0.4.1"
   }

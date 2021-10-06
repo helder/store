@@ -1,5 +1,6 @@
 package scripts;
 
+import sys.io.File;
 import sys.FileSystem;
 import haxe.io.Path;
 using StringTools;
@@ -33,4 +34,5 @@ function main() {
     return isEmpty;
   }
   clean('');
+  File.saveContent('dist/esm/package.json', '{"type": "module"}');
 }

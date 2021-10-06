@@ -1,5 +1,5 @@
 import {Collection, Expression, SqliteStore} from 'helder.store'
-import {BetterSqlite3} from 'helder.store/drivers/BetterSqlite3'
+import {BetterSqlite3} from 'helder.store/drivers/BetterSqlite3.js'
 import {test} from 'uvu'
 import * as assert from 'uvu/assert'
 
