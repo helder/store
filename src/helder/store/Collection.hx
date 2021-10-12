@@ -12,6 +12,7 @@ typedef UnionToIntersection<U> = Dynamic;
 ')
 typedef FieldsOf<Row> = Dynamic;
 
+@:native('Collection')
 @:genes.type('CollectionOf<Row> & UnionToIntersection<FieldsOf<Row>>')
 typedef TSCollection<Row> = Dynamic;
 
