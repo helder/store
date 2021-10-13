@@ -20,7 +20,7 @@ final TestJoins = dbSuite(test -> {
             user: User.fields
           })
         )
-        .orderBy([User.name.asc()])
+        .orderBy(User.name.asc())
     );
     assert.is(results[0].user.name, 'a');
     assert.is(results[1].user.name, 'b');

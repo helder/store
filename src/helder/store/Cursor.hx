@@ -96,7 +96,7 @@ class Cursor<Row> {
     return cast with(cursor, c -> c.select = cast new SelectionImpl(SelectionImpl.create(select)));
   }
 
-  public function orderBy(orderBy: Array<OrderBy>) {
+  public function orderBy(...orderBy: OrderBy) {
     return with(cursor, c -> 
       c.orderBy = 
         (if (this.cursor.orderBy == null) [] else this.cursor.orderBy).concat(orderBy)

@@ -18,7 +18,7 @@ final TestSubQueries = dbSuite(test -> {
         UserAlias.fields.with({
           roles: RoleAlias.where(RoleAlias.id.isIn(UserAlias.roles)).select({
             name: RoleAlias.name
-          }).orderBy([RoleAlias.name.asc()])
+          }).orderBy(RoleAlias.name.asc())
         })
       )
     );
