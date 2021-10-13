@@ -106,7 +106,7 @@ class Cursor<Row> {
 
 class CursorSingleRow<Row> extends Cursor<Row> {}
 
-private inline function with<Row>(cursor: CursorImpl<Row>, mutate: (cursor: CursorImpl<Row>) -> Void) {
+private function with<Row>(cursor: CursorImpl<Row>, mutate: (cursor: CursorImpl<Row>) -> Void) {
   final res: CursorImpl<Row> = {
     from: cursor.from,
     where: cursor.where,
