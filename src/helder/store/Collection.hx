@@ -18,7 +18,7 @@ typedef TSCollection<Row> = Dynamic;
 
 @:expose
 @:native('Collection')
-@:genes.type('{new<Row extends {}>(name: string, options?: {}): TSCollection<Row>}')
+@:genes.type('{new<Row extends {}>(name: string, options?: {}): Collection<Row>}')
 final ESCollection = js.Syntax.code('
   class Collection extends CollectionOf {
     constructor(name, options) {
@@ -118,12 +118,7 @@ class CollectionOf<Row:{}> extends Cursor<Row> {
     return cast get(idColumn);
   }
 
-  #if (genes && js) 
-  @:native('as') 
-  @:genes.type('(name: string) => TSCollection<Row>')
-  public final __as = js.Syntax.code('this.__as');
-  @:native('__as')
-  #end
+  @:genes.returnType('Collection<Row>')
   public function as(name: String): Collection<Row> {
     return new Collection<Row>(
       switch cursor.from {
