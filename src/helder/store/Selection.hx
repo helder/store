@@ -14,6 +14,7 @@ enum Select<T> {
   Cursor<T>(c: Cursor<T>): Select<T>;
   FieldsOf<T>(source: String, ?add: Select<Dynamic>): Select<T>;
   Fields<T>(fields: DynamicAccess<Select<Dynamic>>): Select<T>;
+  Row<T>(source: String): Select<T>;
 }
 
 @:using(helder.store.Selection)

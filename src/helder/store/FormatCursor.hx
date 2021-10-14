@@ -21,7 +21,8 @@ typedef FormatCursorContext = {
 
 function formatSelection<T>(selection: Null<Selection<T>>, ctx: FormatExprContext): Statement {
   return switch selection {
-    case null | {selected: null}: '`data`';
+    case null: '`data`';
+    case {selected: Row(source)}: '${ctx.escapeId(source)}.`data`';
     case {selected: Cursor(cursor)} if (cursor is CursorSingleRow):
       formatCursor(cursor, ctx).wrap(sql -> 
         '(select $sql)'

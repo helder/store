@@ -31,6 +31,7 @@
   ],
   "scripts": {
     "prepare": "lix download && symlink-dir . node_modules/helder.store",
+    "test": "lix test-node.hxml && node bin/node/test.cjs",
     "test:node": "lix test-node.hxml && node bin/node/test.cjs",
     "test:node:sqljs": "lix test-node.hxml -D sqljs && node bin/node/test.cjs",
     "test:php": "lix test-php.hxml && php bin/php/index.php",

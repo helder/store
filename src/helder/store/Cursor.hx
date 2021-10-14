@@ -44,24 +44,26 @@ class Cursor<Row> {
 
   public function leftJoin<T>(that: Collection<Dynamic>, on: Expression<Bool>): Cursor<Row> {
     return with(cursor, c -> {
+      final condition = if (that.cursor.where == null) on else on && that.cursor.where;
       c.collections.set(Collection.getName(that), that);
       c.from = From.Join(
         this.cursor.from,
         that.cursor.from,
         JoinType.Left,
-        on.expr
+        condition.expr
       );
     });
   }
 
   public function innerJoin(that: Collection<Dynamic>, on: Expression<Bool>): Cursor<Row> {
     return with(cursor, c -> {
+      final condition = if (that.cursor.where == null) on else on && that.cursor.where;
       c.collections.set(Collection.getName(that), that);
       c.from = From.Join(
         this.cursor.from,
         that.cursor.from,
         JoinType.Inner,
-        on.expr
+        condition.expr
       );
     });
   }

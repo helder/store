@@ -1,5 +1,6 @@
 package helder.store;
 
+import helder.store.Expression;
 import helder.store.From;
 
 #if (js && genes)
@@ -57,7 +58,7 @@ abstract Collection<T:{}>(CollectionOf<T>) to CollectionOf<T> from CollectionOf<
     }
   }
 
-  public static function  getAlias(collection: CollectionOf<Dynamic>): String {
+  public static function getAlias(collection: CollectionOf<Dynamic>): String {
     return switch collection.cursor.from {
       case Column(Table(name, a), _) | Table(name, a): 
         if (a != null) a else name;
@@ -67,6 +68,7 @@ abstract Collection<T:{}>(CollectionOf<T>) to CollectionOf<T> from CollectionOf<
 }
 
 typedef CollectionOptions = {
+  ?where: Expression<Bool>,
   ?idColumn: String,
   ?alias: String
 }
@@ -80,7 +82,13 @@ class CollectionOf<Row:{}> extends Cursor<Row> {
 
   public function new(name: String, ?options: CollectionOptions) {
     final collections = new Map();
+    final source = 
+      if (options != null && options.alias != null) 
+        options.alias 
+      else 
+        name;
     super({
+      select: new Selection(Row(source)),
       from: Column(
         Table(
           name, 
@@ -88,6 +96,7 @@ class CollectionOf<Row:{}> extends Cursor<Row> {
         ),
         'data'
       ),
+      where: if (options == null) null else options.where,
       collections: collections
     });
     idColumn = 
