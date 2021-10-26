@@ -10,6 +10,7 @@ abstract Memory(SqliteStore) {
       #if sqljs new SqlJs(new SqlJs.Database())
       #elseif js new BetterSqlite3()
       #elseif php new Sqlite3()
-      #else #error 'Not supported' #end
+      #else #error 'Not supported' #end,
+      () -> uuid.Uuid.nanoId()
     );
 } 

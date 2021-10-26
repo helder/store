@@ -1,10 +1,13 @@
-import {Collection, Expression, SqliteStore} from 'helder.store'
-import {BetterSqlite3} from 'helder.store/drivers/BetterSqlite3.js'
+import {Collection, Expression} from 'helder.store'
+import {SqliteStore} from 'helder.store/sqlite/SqliteStore.js'
+import {BetterSqlite3} from 'helder.store/sqlite/drivers/BetterSqlite3.js'
 import {test} from 'uvu'
 import * as assert from 'uvu/assert'
 
+let id = 0
+
 function store() {
-  return new SqliteStore(new BetterSqlite3())
+  return new SqliteStore(new BetterSqlite3(), () => `test_${id++}`)
 }
 
 test('basic', () => {
