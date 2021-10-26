@@ -1,7 +1,7 @@
 package test;
 
 import helder.store.sqlite.SqliteStore;
-import helder.store.drivers.*;
+import helder.store.sqlite.drivers.*;
 
 @:forward
 abstract Memory(SqliteStore) {
