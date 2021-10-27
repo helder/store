@@ -1,4 +1,4 @@
-package helder.store.drivers;
+package helder.store.sqlite.drivers;
 
 import helder.store.Driver;
 import php.db.SQLite3 as SQL3;

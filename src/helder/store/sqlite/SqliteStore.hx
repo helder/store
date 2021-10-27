@@ -10,7 +10,6 @@ import helder.store.sqlite.SqlEscape.escape;
 import helder.store.sqlite.SqlEscape.escapeId;
 import helder.store.Driver;
 import haxe.Json;
-import uuid.Uuid;
 import helder.store.FormatCursor.FormatCursorContext;
 import helder.Store;
 import tink.Anon.merge;
@@ -39,12 +38,15 @@ final context: FormatCursorContext = {
   escapeId: escapeId
 }
 
-@:expose
+typedef CreateId = () -> String;
+
 class SqliteStore implements Store {
   final db: Driver;
+  final createId: CreateId;
 
-  public function new(db: Driver) {
+  public function new(db: Driver, createId: CreateId) {
     this.db = db;
+    this.createId = createId;
     this.db.exec('PRAGMA journal_mode = WAL');
     this.db.exec('PRAGMA optimize');
   }
@@ -97,7 +99,7 @@ class SqliteStore implements Store {
       });
       return objects.map(document -> {
         final res: Row = cast document;
-        if (res.id == null) res.id = Uuid.nanoId();
+        if (res.id == null) res.id = createId();
         prepare([collection], 'insert into ${table} values (?)', options).run(
           [Json.stringify(res)]
         );

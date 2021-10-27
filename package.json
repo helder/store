@@ -1,6 +1,6 @@
 {
   "name": "helder.store",
-  "version": "0.0.0-alpha.18",
+  "version": "0.0.0-alpha.19",
   "license": "MIT",
   "module": "./dist/esm/index.js",
   "main": "./dist/cjs/index.js",
@@ -50,7 +50,7 @@
     "sql.js": "^1.5.0",
     "symlink-dir": "^5.0.0",
     "tsm": "^2.1.0",
-    "typescript": "^4.2.4",
+    "typescript": "^4.4.4",
     "uvu": "^0.4.1"
   }
 }
