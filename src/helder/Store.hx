@@ -2,7 +2,7 @@ package helder;
 
 import helder.store.*;
 
-@:genes.type("Omit<Row, 'id'>")
+@:genes.type("Omit<Row, 'id'> & {id?: string}")
 typedef IdLess<Row> = Row;
 
 typedef QueryOptions = {
