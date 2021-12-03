@@ -1,13 +1,10 @@
 package helder.store;
 
-import helder.store.Cursor.TSSelect;
-import helder.store.Cursor.TSTypeOfValue;
 import haxe.DynamicAccess;
-import helder.store.Collection.CollectionOf;
+import helder.store.Collection.CollectionImpl;
 import helder.store.Expression.ExpressionImpl;
 
-typedef TS_S = TSSelect;
-typedef TS_T<T> = TSTypeOfValue<T>;
+typedef SelectionWith<T> = helder.store.util.TSTypes.TSWith<T>;
 
 enum Select<T> {
   Expression<T>(e: Expression<T>): Select<T>;
@@ -27,13 +24,11 @@ class SelectionImpl<T> {
   
   #if (genes && js) 
   @:native('with') 
-  @:genes.type('<S extends TS_S>(select: S) => SelectionImpl<
-    Omit<T, keyof TS_T<S>> & TS_T<S>
-  >')
+  @:genes.type('SelectionWith<T>')
   public final __with = js.Syntax.code('this.__with');
   @:native('__with') 
   #end
-  public function _with<X>(that: Dynamic) {
+  @:genes.internal public function _with<X>(that: Dynamic): Dynamic {
     return new SelectionImpl(switch this.selected {
       case FieldsOf(name, null): FieldsOf(name, create(that));
       default: throw 'assert';
@@ -45,6 +40,7 @@ class SelectionImpl<T> {
   public static function create<T>(input: Dynamic): Select<T> {
     if (input is SelectionImpl) return input.selected;
     if (input is ExpressionImpl) return Select.Expression(input);
+    if (input is CollectionImpl) return Select.Fields(input.fields);
     if (input is Cursor) return Select.Cursor(input);
     if (input is Select) return input;
     final obj: DynamicAccess<Dynamic> = input;
@@ -68,7 +64,7 @@ abstract Selection<T>(SelectionImpl<T>) from SelectionImpl<T> {
   }
 
   @:noUsing
-  public static function fieldsOf<T:{}>(collection: CollectionOf<T>): Selection<T> {
+  public static function fieldsOf<T:{}>(collection: CollectionImpl<T>): Selection<T> {
     return new Selection(FieldsOf(Collection.getAlias(collection)));
   }
   

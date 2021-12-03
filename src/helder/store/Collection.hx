@@ -2,6 +2,9 @@ package helder.store;
 
 import helder.store.Expression;
 import helder.store.From;
+import helder.store.Selection;
+
+typedef CollectionWith<T> = helder.store.util.TSTypes.TSWith<T>;
 
 #if (js && genes)
 @:genes.type('(U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never')
@@ -14,14 +17,14 @@ typedef UnionToIntersection<U> = Dynamic;
 typedef FieldsOf<Row> = Dynamic;
 
 @:native('Collection')
-@:genes.type('CollectionOf<Row> & UnionToIntersection<FieldsOf<Row>>')
+@:genes.type('CollectionImpl<Row> & UnionToIntersection<FieldsOf<Row>>')
 typedef TSCollection<Row> = Dynamic;
 
 @:expose
 @:native('Collection')
 @:genes.type('{new<Row extends {}>(name: string, options?: {}): Collection<Row>}')
 final ESCollection = js.Syntax.code('
-  class Collection extends CollectionOf {
+  class Collection extends CollectionImpl {
     constructor(name, options) {
       super(name, options);
       return new Proxy(this, {
@@ -36,9 +39,9 @@ final ESCollection = js.Syntax.code('
 #end
 
 @:forward
-abstract Collection<T:{}>(CollectionOf<T>) to CollectionOf<T> from CollectionOf<T> {
+abstract Collection<T:{}>(CollectionImpl<T>) to CollectionImpl<T> from CollectionImpl<T> {
   inline public function new(name: String, ?options: CollectionOptions) {
-    final inst = new CollectionOf<T>(name, options);
+    final inst = new CollectionImpl<T>(name, options);
     this = 
       #if js new helder.store.util.RuntimeProxy(inst, inst.get)
       #else inst #end;
@@ -51,19 +54,26 @@ abstract Collection<T:{}>(CollectionOf<T>) to CollectionOf<T> from CollectionOf<
     #end
   }
 
-  public static function getName(collection: CollectionOf<Dynamic>): String {
+  public static function getName(collection: CollectionImpl<Dynamic>): String {
     return switch collection.cursor.from {
       case Column(Table(name, _), _) | Table(name, _): name;
       default: throw 'unexpected';
     }
   }
 
-  public static function getAlias(collection: CollectionOf<Dynamic>): String {
+  public static function getAlias(collection: CollectionImpl<Dynamic>): String {
     return switch collection.cursor.from {
       case Column(Table(name, a), _) | Table(name, a): 
         if (a != null) a else name;
       default: throw 'unexpected';
     }
+  }
+
+  // Extern generic inline is useless, but forces the compiler to close
+  // what is otherwise a constrained monomorph.
+  @:extern @:generic inline
+  public function with<B: {}, C: T & B>(b:Selection<B>): Selection<C> {
+    return cast this._with(cast b);
   }
 }
 
@@ -73,9 +83,9 @@ typedef CollectionOptions = {
   ?alias: String
 }
 
-typedef GenericCollection = CollectionOf<Dynamic>;
+typedef GenericCollection = CollectionImpl<Dynamic>;
 
-class CollectionOf<Row:{}> extends Cursor<Row> {
+class CollectionImpl<Row:{}> extends Cursor<Row> {
   private final idColumn: String;
   public var id(get, never): Expression<String>;
   public var fields(get, never): Selection<Row>;
@@ -125,6 +135,12 @@ class CollectionOf<Row:{}> extends Cursor<Row> {
 
   function get_id(): Expression<String> {
     return cast get(idColumn);
+  }
+  
+  @:native('with')
+  @:genes.type('CollectionWith<Row>')
+  public function _with<S>(that: S) {
+    return this.fields._with(that);
   }
 
   @:genes.returnType('Collection<Row>')

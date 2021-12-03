@@ -15,7 +15,7 @@ final TestSubQueries = dbSuite(test -> {
     final RoleAlias = Role.as('role');
     final bundled = db.first(
       UserAlias.select(
-        UserAlias.fields.with({
+        UserAlias.with({
           roles: RoleAlias.where(RoleAlias.id.isIn(UserAlias.roles)).select({
             name: RoleAlias.name
           }).orderBy(RoleAlias.name.asc())
@@ -39,9 +39,9 @@ final TestSubQueries = dbSuite(test -> {
     });
     final page = db.first(
       Entry.select(
-        Entry.fields.with({
+        Entry.with({
           languages: Language.where(Language.entry.is(Entry.id)).select(
-            Language.fields.with({
+            Language.with({
               versions: Version.where(Version.language.is(Language.id))
             })
           )
@@ -65,7 +65,7 @@ final TestSubQueries = dbSuite(test -> {
     final post1 = store.insert(Post, {title: 'hello', user: user1.id});
     final userWithPosts = store.first(
       User.where(User.id == user1.id).select(
-        User.fields.with({
+        User.with({
           posts: Post.where(Post.user == User.id).select({
             id: Post.id
           })

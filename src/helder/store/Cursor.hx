@@ -3,6 +3,7 @@ package helder.store;
 import helder.store.From;
 import helder.store.Collection;
 import helder.store.Selection;
+import helder.store.util.TSTypes;
 
 @:structInit 
 @:allow(helder.store.Cursor)
@@ -14,26 +15,8 @@ class CursorImpl<Row> {
   public var offset(default, null): Null<Int> = null;
   public var orderBy(default, null): Null<Array<OrderBy>> = null;
 
-  public var collections(default, null): Map<String, CollectionOf<Dynamic>>;
+  public var collections(default, null): Map<String, CollectionImpl<Dynamic>>;
 }
-
-@:genes.type('
-  | Expression<any>
-  | SelectionImpl<any>
-  | {[key: string]: TSSelect | Cursor<any>}
-')
-typedef TSSelect = {};
-
-@:genes.type('
-  T extends SelectionImpl<infer K> ? K :
-  T extends CursorSingleRow<infer K> ? K :
-  T extends Cursor<infer K> ? Array<K> :
-  T extends Expression<infer K> ? K :
-  T extends {[key: string]: TSSelect | Cursor<any>} 
-    ? {[K in keyof T]: TSTypeOfValue<T[K]>}
-    : any
-')
-typedef TSTypeOfValue<T> = T;
 
 @:expose
 class Cursor<Row> {
@@ -90,10 +73,10 @@ class Cursor<Row> {
   
   #if (genes && js) 
   @:native('select') 
-  @:genes.type('<T extends TSSelect>(select: T) => Cursor<TSTypeOfValue<T>>')
-  public final __select = js.Syntax.code('this.__select');
+  public final __select: CursorSelect = js.Syntax.code('this.__select');
   @:native('__select')
   #end
+  @:genes.internal 
   public function select<T>(select: Selection<T>): Cursor<T> {
     return cast with(cursor, c -> c.select = cast new SelectionImpl(SelectionImpl.create(select)));
   }

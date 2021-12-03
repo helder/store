@@ -1,6 +1,6 @@
-# @install: lix --silent download "gh://github.com/benmerckx/genes#f57341513445d7ec066c11c5cffbd0b982873351" into genes/0.4.2/github/f57341513445d7ec066c11c5cffbd0b982873351
+# @install: lix --silent download "gh://github.com/benmerckx/genes#b87a0d28d7ee8650d9a371d447d9347e35587597" into genes/0.4.2/github/b87a0d28d7ee8650d9a371d447d9347e35587597
 -lib helder.set
--cp ${HAXE_LIBCACHE}/genes/0.4.2/github/f57341513445d7ec066c11c5cffbd0b982873351/src
+-cp ${HAXE_LIBCACHE}/genes/0.4.2/github/b87a0d28d7ee8650d9a371d447d9347e35587597/src
 -D genes=0.4.2
 # -D js-es=6
 --macro genes.Generator.use()

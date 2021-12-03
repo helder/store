@@ -8,7 +8,7 @@ using StringTools;
 final esm = './dist/esm';
 final cjs = './dist/cjs';
 
-final keep = ['OrderBy', 'Document', 'Map', 'StdTypes'];
+final keep = ['OrderBy', 'Document', 'Map', 'StdTypes', 'TSTypes'];
 
 function main() {
   function clean(target: String) {
