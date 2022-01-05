@@ -30,8 +30,8 @@ class SqlJs implements Driver {
       throw e;
     }
   }
-  public static function init() {
-    return SqlJsLib.default_.call_().then(sql-> {
+  public static function init(?options) {
+    return SqlJsLib.default_.call_(options).then(sql-> {
       js.Lib.global.__sqlJs = sql;
     });
   }
