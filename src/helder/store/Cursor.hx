@@ -51,11 +51,11 @@ class Cursor<Row> {
     });
   }
 
-  public function take(limit: Int): Cursor<Row> {
+  public function take(limit: Null<Int>): Cursor<Row> {
     return with(cursor, c -> c.limit = limit);
   }
 
-  public function skip(offset: Int): Cursor<Row> {
+  public function skip(offset: Null<Int>): Cursor<Row> {
     return with(cursor, c -> c.offset = offset);
   }
 
