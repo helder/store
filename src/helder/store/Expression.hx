@@ -292,4 +292,8 @@ class ExpressionImpl<T> {
   public static function field(path: Array<String>) {
     return new Expression(Field(path));
   }
+
+  public function toJSON() {
+    return expr;
+  }
 }

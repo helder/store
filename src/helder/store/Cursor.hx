@@ -22,6 +22,23 @@ class CursorImpl<Row> {
   public var parameterized(default, null): Null<ParameterizedCursor<Row>> = null;
 
   public var collections(default, null): Map<String, CollectionImpl<Dynamic>>;
+
+  public function toJSON(): Dynamic {
+    return switch parameterized {
+      case null: {
+        from: from,
+        where: where,
+        select: select,
+        limit: limit,
+        offset: offset,
+        orderBy: orderBy
+      }
+      case {cursor: cursor, params: params}: {
+        cursor: cursor.toJSON(),
+        params: params
+      }
+    }
+  }
 }
 
 @:expose
@@ -92,6 +109,25 @@ class Cursor<Row> {
       c.orderBy = 
         (if (this.cursor.orderBy == null) [] else this.cursor.orderBy).concat(orderBy)
     );
+  }
+
+  public static function fromJSON(data: Dynamic): Cursor<Dynamic> {
+    if (data.cursor != null) {
+      return fromJSON(data).parameterize(data.params);
+    }
+    return new Cursor({
+      from: data.from,
+      select: data.select,
+      where: data.where,
+      limit: data.limit,
+      offset: data.offset,
+      orderBy: data.orderBy,
+      collections: new Map()
+    });
+  }
+
+  public function toJSON() {
+    return this.cursor.toJSON();
   }
 
   private function parameterize(params: Dynamic) {
