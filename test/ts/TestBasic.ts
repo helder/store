@@ -1,4 +1,4 @@
-import {Collection, Expression} from 'helder.store'
+import {Collection, Expression, query} from 'helder.store'
 import {SqliteStore} from 'helder.store/sqlite/SqliteStore.js'
 import {BetterSqlite3} from 'helder.store/sqlite/drivers/BetterSqlite3.js'
 import {test} from 'uvu'
@@ -51,6 +51,30 @@ test('select', () => {
     testProp: Expression.value(123)
   })))
   assert.is(res2.testProp, 123)
+})
+
+test('update', () => {
+  const db = store()
+  const Test = new Collection<typeof a & {id: string}>('test')
+  const a = {propA: 10, propB: 5}
+  const b = {propA: 20, propB: 5}
+  db.insertAll(Test, [a, b])
+  db.update(Test.where(Test.propA.is(10)), {propA: 15})
+  assert.ok(
+    db.first(Test.where(Test.propA.is(15)))
+  )
+})
+
+test('query', () => {
+  const db = store()
+  const Test = new Collection<typeof a & {id: string}>('test')
+  const a = {prop: 10, propB: 5}
+  const b = {prop: 20, propB: 5}
+  db.insertAll(Test, [a, b])
+  type Input = {prop: number}
+  const byProp = query(({prop}: Input) => Test.where(Test.prop.is(prop)));
+  assert.is(db.first(byProp({prop: 10}))!.prop, 10);
+  assert.is(db.first(byProp({prop: 20}))!.prop, 20);
 })
 
 test.run()

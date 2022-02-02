@@ -47,7 +47,7 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
             }
           )
         );
-    case Value(value):
+    case Param(Value(value)):
       if (value == null)
         return 'null';
       if (value is Bool)
@@ -59,11 +59,13 @@ function formatExpr(expr: Expr, ctx: FormatExprContext): Statement {
       if (value is Int || value is Float || value is String)
         return 
           if (ctx.formatInline == true) ctx.escape(value)
-          else new Statement('?', [value]);
+          else new Statement('?', [Value(value)]);
       return ctx.escape(value);
+    case Param(param):
+      return new Statement('?', [param]);
     case Field(path):
       return ctx.formatField(path);
-    case Call('cast', [e, Value(type)]):
+    case Call('cast', [e, Param(Value(type))]):
       final stmt = formatExpr(e, ctx);
       return new Statement(
         'cast(${stmt.sql} as ${ctx.escape(type)})',

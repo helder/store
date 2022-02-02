@@ -43,6 +43,10 @@ typedef CreateId = () -> String;
 class SqliteStore implements Store {
   final db: Driver;
   final createId: CreateId;
+  final statements = new Map<Cursor<Dynamic>, {
+    stmt: Statement,
+    prepared: PreparedStatement
+  }>();
 
   public function new(db: Driver, createId: CreateId) {
     this.db = db;
@@ -52,9 +56,27 @@ class SqliteStore implements Store {
   }
 
   public function all<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Array<Row> {
-    final stmt = formatCursorSelect(cursor, context);
-    return prepare(cursor.cursor.collections, stmt.sql, options)
-      .all(stmt.params)
+    var stmt: Statement, prepared, params = null;
+    if (cursor.cursor.parameterized != null) {
+      final parameterized = cursor.cursor.parameterized;
+      if (!statements.exists(parameterized.cursor)) {
+        final stmt = formatCursorSelect(cursor, context);
+        statements.set(parameterized.cursor, {
+          stmt: stmt,
+          prepared: prepare(cursor.cursor.collections, stmt.sql, options)
+        });
+      }
+      final cache = statements.get(parameterized.cursor);
+      if (cache == null) throw 'assert';
+      stmt = cache.stmt;
+      prepared = cache.prepared;
+      params = parameterized.params;
+    } else {
+      stmt = formatCursorSelect(cursor, context);
+      prepared = prepare(cursor.cursor.collections, stmt.sql, options);
+    }
+    return prepared
+      .all(stmt.getParams(params))
       .map((col: String) -> haxe.Json.parse(col));
   }
 
@@ -74,7 +96,9 @@ class SqliteStore implements Store {
       cursor.cursor.collections, 
       stmt.sql, 
       options
-    ).run(stmt.params);
+    ).run(stmt.getParams(
+      cursor.cursor.parameterized != null ? cursor.cursor.parameterized.params : null
+    ));
   }
 
   public function count<Row>(cursor: Cursor<Row>, ?options: QueryOptions): Int {
@@ -84,7 +108,9 @@ class SqliteStore implements Store {
       'select count() from (${stmt.sql})',
       options
     )
-      .get(stmt.params);
+      .get(stmt.getParams(
+        cursor.cursor.parameterized != null ? cursor.cursor.parameterized.params : null
+      ));
   }
   
   public function insertAll<Row:Document, In:{?id: String} & Row>(
@@ -120,7 +146,9 @@ class SqliteStore implements Store {
     return db.transaction(() -> {
       final stmt = formatCursorUpdate(cursor, update, context);
       return prepare(cursor.cursor.collections, stmt.sql, options)
-        .run(stmt.params);
+        .run(stmt.getParams(
+          cursor.cursor.parameterized != null ? cursor.cursor.parameterized.params : null
+        ));
     });
   }
 

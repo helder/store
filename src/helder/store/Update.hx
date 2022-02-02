@@ -2,7 +2,8 @@ package helder.store;
 
 import haxe.DynamicAccess;
 
-typedef UpdateImpl<T> = DynamicAccess<Expression<Dynamic>>;
+@:genes.type('Partial<{[K in keyof T]: EV<T[K]>}>')
+typedef UpdateImpl<T> = DynamicAccess<Expression.EV<Dynamic>>;
 
 @:forward
 abstract Update<T>(UpdateImpl<T>) {

@@ -34,7 +34,7 @@ enum Expr {
   UnOp(op: UnOp, expr: Expr);
   BinOp(op: BinOp, a: Expr, b: Expr);
   Field(path: Array<String>);
-  Value(value: Null<Any>);
+  Param(param: Parameter);
   Call(method: String, params: Array<Expr>);
   Access(expr: Expr, field: String);
   Query(cursor: Cursor<Any>);
@@ -44,16 +44,16 @@ typedef EV<T> = Either<Expression<T>, T>;
 
 function toExpr<T>(ev: Null<Either<EV<T>, Cursor<T>>>): Expr {
   return 
-    if (ev == null) return Value(null);
+    if (ev == null) return Param(Value(null));
     else if (ev is ExpressionImpl) (cast ev).expr
     else if (ev is Expr) (cast ev: Expr) 
     else if (ev is Cursor) Query(ev)
-    else Value((cast ev: T));
+    else Param(Value((cast ev: T)));
 }
 
 private function isConstant(e: Expr, value: Any) {
   return switch e {
-    case Value(v): v == value;
+    case Param(Value(v)): v == value;
     default: false;
   }
 }
@@ -195,7 +195,7 @@ class ExpressionImpl<T> {
     if (isConstant(b, false)) return new Expression(cast b);
     return new Expression(BinOp(And, a, b));
   }
-  static final NULL = Expr.Value(null);
+  static final NULL = Expr.Param(Value(null));
   public function is(that: EV<T>): Expression<Bool> {
     if (that == null || that is ExpressionImpl && NULL.equals((that: Expression<T>).expr))
       return isNull();
@@ -287,7 +287,7 @@ class ExpressionImpl<T> {
   #end
 
   public static function value<T>(value: T): Expression<T> {
-    return new Expression<T>(Value(value));
+    return new Expression<T>(Param(Value(value)));
   }
   public static function field(path: Array<String>) {
     return new Expression(Field(path));

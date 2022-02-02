@@ -5,6 +5,11 @@ import helder.store.Collection;
 import helder.store.Selection;
 import helder.store.util.TSTypes;
 
+typedef ParameterizedCursor<Row> = {
+  cursor: Cursor<Row>,
+  params: Dynamic
+}
+
 @:structInit 
 @:allow(helder.store.Cursor)
 class CursorImpl<Row> {
@@ -14,6 +19,7 @@ class CursorImpl<Row> {
   public var limit(default, null): Null<Int> = null;
   public var offset(default, null): Null<Int> = null;
   public var orderBy(default, null): Null<Array<OrderBy>> = null;
+  public var parameterized(default, null): Null<ParameterizedCursor<Row>> = null;
 
   public var collections(default, null): Map<String, CollectionImpl<Dynamic>>;
 }
@@ -87,6 +93,13 @@ class Cursor<Row> {
         (if (this.cursor.orderBy == null) [] else this.cursor.orderBy).concat(orderBy)
     );
   }
+
+  private function parameterize(params: Dynamic) {
+    return with(cursor, c -> c.parameterized = {
+      cursor: this,
+      params: params
+    });
+  }
 }
 
 class CursorSingleRow<Row> extends Cursor<Row> {}
@@ -99,7 +112,8 @@ private function with<Row>(cursor: CursorImpl<Row>, mutate: (cursor: CursorImpl<
     limit: cursor.limit,
     offset: cursor.offset,
     orderBy: cursor.orderBy,
-    collections: new Map()
+    collections: new Map(),
+    parameterized: cursor.parameterized
   }
   for (key => value in  cursor.collections)
     res.collections.set(key, value);

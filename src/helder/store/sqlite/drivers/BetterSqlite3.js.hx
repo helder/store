@@ -14,6 +14,8 @@ class BetterSqlite3 implements Driver {
     return new Statement(db.prepare(sql));
   public function transaction<T>(run: () -> T): T
     return db.transaction(run).call();
+  public function export()
+    return (db: Dynamic).serialize();
 }
 
 typedef BSQL3Statement = {
