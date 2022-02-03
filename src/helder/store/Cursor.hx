@@ -1,5 +1,6 @@
 package helder.store;
 
+import helder.store.Expression.toExpr;
 import helder.store.From;
 import helder.store.Collection;
 import helder.store.Selection;
@@ -118,7 +119,7 @@ class Cursor<Row> {
     return new Cursor({
       from: data.from,
       select: data.select,
-      where: data.where,
+      where: data.where != null ? new Expression(toExpr(data.where)) : null,
       limit: data.limit,
       offset: data.offset,
       orderBy: data.orderBy,
