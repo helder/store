@@ -28,8 +28,8 @@ class CursorImpl<Row> {
     return switch parameterized {
       case null: {
         from: from,
-        where: where,
-        select: select,
+        where: where != null ? where.toJSON() : null,
+        select: select != null ? select.toJSON() : null,
         limit: limit,
         offset: offset,
         orderBy: orderBy
@@ -118,7 +118,7 @@ class Cursor<Row> {
     }
     return new Cursor({
       from: data.from,
-      select: data.select,
+      select: data.select != null ? new Selection(data.select) : null,
       where: data.where != null ? new Expression(toExpr(data.where)) : null,
       limit: data.limit,
       offset: data.offset,

@@ -49,6 +49,10 @@ class SelectionImpl<T> {
       res[key] = create(value);
     return Select.Fields(res);
   }
+
+  public function toJSON() {
+    return selected;
+  }
 }
 
 @:forward
