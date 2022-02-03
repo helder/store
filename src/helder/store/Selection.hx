@@ -2,12 +2,12 @@ package helder.store;
 
 import haxe.DynamicAccess;
 import helder.store.Collection.CollectionImpl;
-import helder.store.Expression.ExpressionImpl;
+import helder.store.Expression;
 
 typedef SelectionWith<T> = helder.store.util.TSTypes.TSWith<T>;
 
 enum Select<T> {
-  Expression<T>(e: Expression<T>): Select<T>;
+  Expression<T>(e: Expr): Select<T>;
   Cursor<T>(c: Cursor<T>): Select<T>;
   FieldsOf<T>(source: String, ?add: Select<Dynamic>): Select<T>;
   Fields<T>(fields: DynamicAccess<Select<Dynamic>>): Select<T>;
@@ -39,7 +39,7 @@ class SelectionImpl<T> {
   // but then the lib is only useable from haxe
   public static function create<T>(input: Dynamic): Select<T> {
     if (input is SelectionImpl) return input.selected;
-    if (input is ExpressionImpl) return Select.Expression(input);
+    if (input is ExpressionImpl) return Select.Expression(input.expr);
     if (input is CollectionImpl) return Select.Fields(input.fields);
     if (input is Cursor) return Select.Cursor(input);
     if (input is Select) return input;

@@ -15,7 +15,7 @@ final TestJson = dbSuite(test -> {
     assert.is(objects.length, amount);
     final stored = db.insertAll(Node, objects);
     assert.is(db.count(Node), amount);
-    final q = Node.where(Node.index.is(1)).select({
+    final q = Node.where(Node.index == 1).select({
       fieldA: Expression.value(12),
       fieldB: Node.index
     });

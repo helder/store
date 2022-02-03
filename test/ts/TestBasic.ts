@@ -1,4 +1,4 @@
-import {Collection, Expression, query} from 'helder.store'
+import {Collection, Expression, query, Cursor} from 'helder.store'
 import {SqliteStore} from 'helder.store/sqlite/SqliteStore.js'
 import {BetterSqlite3} from 'helder.store/sqlite/drivers/BetterSqlite3.js'
 import {test} from 'uvu'
@@ -75,6 +75,24 @@ test('query', () => {
   const byProp = query(({prop}: Input) => Test.where(Test.prop.is(prop)));
   assert.is(db.first(byProp({prop: 10}))!.prop, 10);
   assert.is(db.first(byProp({prop: 20}))!.prop, 20);
+})
+
+test('json', () => {
+  const db = store()
+  const Test = new Collection<typeof a & {id: string}>('test')
+  const a = {prop: 10, propB: 5}
+  const b = {prop: 20, propB: 5}
+  db.insertAll(Test, [a, b])
+  const q = Test.where(Test.prop.is(10)).select({
+    fieldA: Expression.value(12),
+    fieldB: Test.propB
+  });
+  const res1 = db.first(q);
+  assert.is(res1.fieldA, 12);
+  assert.is(res1.fieldB, 5);
+  const res2 = db.first(Cursor.fromJSON(q.toJSON()));
+  assert.is(res2.fieldA, 12);
+  assert.is(res2.fieldB, 5);
 })
 
 test.run()
