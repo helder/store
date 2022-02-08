@@ -1,5 +1,6 @@
 package helder.store;
 
+import haxe.DynamicAccess;
 import helder.store.Expression;
 import helder.store.From;
 import helder.store.Selection;
@@ -62,11 +63,7 @@ abstract Collection<T:{}>(CollectionImpl<T>) to CollectionImpl<T> from Collectio
   }
 
   public static function getAlias(collection: CollectionImpl<Dynamic>): String {
-    return switch collection.cursor.from {
-      case Column(Table(name, a), _) | Table(name, a): 
-        if (a != null) a else name;
-      default: throw 'unexpected';
-    }
+    return collection.cursor.from.source();
   }
 
   // Extern generic inline is useless, but forces the compiler to close
@@ -78,6 +75,8 @@ abstract Collection<T:{}>(CollectionImpl<T>) to CollectionImpl<T> from Collectio
 }
 
 typedef CollectionOptions = {
+  ?flat: Bool,
+  ?columns: Array<String>,
   ?where: Expression<Bool>,
   ?idColumn: String,
   ?alias: String
@@ -97,15 +96,31 @@ class CollectionImpl<Row:{}> extends Cursor<Row> {
         options.alias 
       else 
         name;
+    final isFlat = options != null && options.flat;
+    final cols = options != null && options.columns != null ? options.columns : [];
+    /*var select: Select<Dynamic> = Row(source);
+    if (isFlat) {
+      final fields: DynamicAccess<Select<Dynamic>> = {};
+      for (column in cols) 
+        fields.set(column, Select.Expression(Expr.Field([
+          if (options == null || options.alias == null) name else options.alias,
+            column
+        ])));
+      select = Fields(fields);
+    }*/
+    final from = isFlat
+      ? Table(name, cols, options != null ? options.alias : null)
+      : Column(
+          Table(
+            name, 
+            ['data'],
+            if (options == null) null else options.alias
+          ),
+          'data'
+        );
     super({
-      select: new Selection(Row(source)),
-      from: Column(
-        Table(
-          name, 
-          if (options == null) null else options.alias
-        ),
-        'data'
-      ),
+      select: new Selection(Row(from)),
+      from: from,
       where: if (options == null) null else options.where,
       collections: collections
     });
@@ -117,8 +132,9 @@ class CollectionImpl<Row:{}> extends Cursor<Row> {
 
   public function get<T>(name: String): Expression<T> {
     final path: Array<String> = switch cursor.from {
-      case Column(From.Table(name, alias), column): [if (alias != null) alias else name, column];
-      case Table(name, alias): [if (alias != null) alias else name];
+      case Column(From.Table(name, _, alias), column): 
+        [if (alias != null) alias else name, column];
+      case Table(name, _, alias): [if (alias != null) alias else name];
       default: throw 'Cannot field access';
     }
     return new Expression(Field(path.concat([name])));

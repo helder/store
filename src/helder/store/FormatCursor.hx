@@ -1,7 +1,10 @@
 package helder.store;
 
+import haxe.DynamicAccess;
+import helder.store.sqlite.SqlEscape.escapeId;
 import helder.store.Expression.toExpr;
 import helder.store.From.JoinType;
+import helder.store.Selection;
 import helder.store.FormatExpr.FormatExprContext;
 import helder.store.FormatExpr.formatExpr;
 import helder.store.Expression.ExpressionImpl;
@@ -22,7 +25,18 @@ typedef FormatCursorContext = {
 function formatSelection<T>(selection: Null<Selection<T>>, ctx: FormatExprContext): Statement {
   return switch selection {
     case null: '`data`';
-    case {selected: Row(source)}: '${ctx.escapeId(source)}.`data`';
+    case {selected: Row(Column(from, column))}:
+        '${ctx.escapeId(from.source())}.${escapeId(column)}';
+    case {selected: Row(Table(name, columns, alias))}:
+        final fields: DynamicAccess<Select<Dynamic>> = {}
+        for (column in columns) 
+          fields.set(column, Select.Expression(Expr.Field([
+            if (alias == null) name else alias,
+            column
+          ])));
+      formatSelection(new Selection(Fields(fields)), ctx);
+    case {selected: Row(v)}:
+      throw 'Cannot select $v';
     case {selected: Cursor(cursor)} if (cursor is CursorSingleRow):
       formatCursor(cursor, ctx).wrap(sql -> 
         '(select $sql)'
@@ -34,10 +48,17 @@ function formatSelection<T>(selection: Null<Selection<T>>, ctx: FormatExprContex
         '(select json_group_array(json(res)) from (select $sql))'
       );
     case {selected: Expression(e)}: formatExpr(e, ctx);
-    case {selected: FieldsOf(source, with)}:
-      var target = 'json(${ctx.escapeId(source)}.`data`)';
+    case {selected: FieldsOf(Column(from, column), with)}:
+      var target = 'json(${ctx.escapeId(from.source())}.${ctx.escapeId(column)})';
       if (with == null) target;
       else formatSelection(with, ctx).wrap(sql -> 'json_patch($target, $sql)');
+    case {selected: FieldsOf(from = Table(_, _, _), with)}:
+      var target = formatSelection(new Selection(Row(from)), ctx);
+      if (with == null) target;
+      else 
+        ('json_patch(': Statement) + target + ', ' + formatSelection(with, ctx) + ')';
+    case {selected: FieldsOf(v, _)}:
+        throw 'Cannot select $v';
     case {selected: Fields(fields)}:
       var res: Statement = '';
       var i = 0;
@@ -61,8 +82,8 @@ private function joinType(t: JoinType) {
 
 function formatFrom(from: From, ctx: FormatExprContext): Statement {
   return switch from {
-    case Table(name, null): ctx.escapeId(name);
-    case Table(name, alias): '${ctx.escapeId(name)} as ${ctx.escapeId(alias)}';
+    case Table(name, _, null): ctx.escapeId(name);
+    case Table(name, _, alias): '${ctx.escapeId(name)} as ${ctx.escapeId(alias)}';
     case Column(t, _): formatFrom(t, ctx);
     case Join(a, b, type, condition):
       final left = formatFrom(a, ctx);

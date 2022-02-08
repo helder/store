@@ -1,5 +1,6 @@
 package helder.store;
 
+import helder.store.From;
 import haxe.DynamicAccess;
 import helder.store.Collection.CollectionImpl;
 import helder.store.Expression;
@@ -9,9 +10,9 @@ typedef SelectionWith<T> = helder.store.util.TSTypes.TSWith<T>;
 enum Select<T> {
   Expression<T>(e: Expr): Select<T>;
   Cursor<T>(c: Cursor<T>): Select<T>;
-  FieldsOf<T>(source: String, ?add: Select<Dynamic>): Select<T>;
+  FieldsOf<T>(source: From, ?add: Select<Dynamic>): Select<T>;
   Fields<T>(fields: DynamicAccess<Select<Dynamic>>): Select<T>;
-  Row<T>(source: String): Select<T>;
+  Row<T>(source: From): Select<T>;
 }
 
 @:using(helder.store.Selection)
@@ -69,7 +70,7 @@ abstract Selection<T>(SelectionImpl<T>) from SelectionImpl<T> {
 
   @:noUsing
   public static function fieldsOf<T:{}>(collection: CollectionImpl<T>): Selection<T> {
-    return new Selection(FieldsOf(Collection.getAlias(collection)));
+    return new Selection(FieldsOf(collection.cursor.from));
   }
   
   // Extern generic inline is useless, but forces the compiler to close

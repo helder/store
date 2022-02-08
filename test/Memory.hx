@@ -4,7 +4,7 @@ import helder.store.sqlite.SqliteStore;
 import helder.store.sqlite.drivers.*;
 
 @:forward
-abstract Memory(SqliteStore) {
+abstract Memory(SqliteStore) to SqliteStore {
   public function new()
     this = new SqliteStore(
       #if sqljs new SqlJs(new SqlJs.Database())

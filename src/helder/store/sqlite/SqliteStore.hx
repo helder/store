@@ -121,16 +121,25 @@ class SqliteStore implements Store {
     ?options: QueryOptions
   ): Array<Row> {
     return db.transaction(() -> {
-      final table = escapeId(switch collection.cursor.from {
-        case Table(name, _) | Column(Table(name, _), _): name;
-        default: throw 'assert';
-      });
       return objects.map(document -> {
         final res: Row = cast document;
+        final fields: DynamicAccess<Dynamic> = cast res;
         if (res.id == null) res.id = createId();
-        prepare([collection], 'insert into ${table} values (?)', options).run(
-          [Json.stringify(res)]
-        );
+        switch collection.cursor.from {
+          case Column(Table(name, _, _), _):
+            prepare([collection], 'insert into ${escapeId(name)} values (?)', options)
+              .run([Json.stringify(res)]);
+          case Table(name, columns, _):
+            prepare(
+              [collection], 
+              'insert into ${escapeId(name)} values (${columns.map(_ -> '?').join(', ')})', 
+              options
+            ).run(
+              columns.map(col -> cast fields[col])
+            );
+          default:
+            throw 'assert';
+        }
         return res;
       });
     });
@@ -197,7 +206,7 @@ class SqliteStore implements Store {
     return createOnError(collections, () -> db.prepare(query));
   }
 
-  function createFts5<Row: {}>(
+  public function createFts5<Row: {}>(
     collection: Collection<Row>,
     name: String,
     fields: (collection: Collection<Row>) -> DynamicAccess<Expression<String>>
@@ -207,7 +216,7 @@ class SqliteStore implements Store {
     return created;
   }
 
-  function createFts5Table<Row: {}>(
+  public function createFts5Table<Row: {}>(
     collection: Collection<Row>,
     name: String,
     fields: (collection: Collection<Row>) -> DynamicAccess<Expression<String>>
@@ -225,7 +234,7 @@ class SqliteStore implements Store {
     return true;
   }
 
-  function createFts5Triggers<Row: {}>(
+  public function createFts5Triggers<Row: {}>(
     collection: Collection<Row>,
     name: String,
     fields: (collection: Collection<Row>) -> DynamicAccess<Expression<String>>
