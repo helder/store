@@ -1,5 +1,7 @@
 package helder.store.sqlite;
 
+import helder.store.FormatCursor.formatFrom;
+import haxe.DynamicAccess;
 import helder.store.Collection.GenericCollection;
 import helder.store.Expression.toExpr;
 import helder.store.FormatExpr.formatExpr;
@@ -193,6 +195,79 @@ class SqliteStore implements Store {
     if (options != null && options.debug)
       trace(query);
     return createOnError(collections, () -> db.prepare(query));
+  }
+
+  function createFts5<Row: {}>(
+    collection: Collection<Row>,
+    name: String,
+    fields: (collection: Collection<Row>) -> DynamicAccess<Expression<String>>
+  ): Bool {
+    final created = this.createFts5Table(collection, name, fields);
+    if (created) this.createFts5Triggers(collection, name, fields);
+    return created;
+  }
+
+  function createFts5Table<Row: {}>(
+    collection: Collection<Row>,
+    name: String,
+    fields: (collection: Collection<Row>) -> DynamicAccess<Expression<String>>
+  ): Bool {
+    final exists = this.db
+      .prepare('select distinct tbl_name from sqlite_master where tbl_name = ?')
+      .get([name]);
+    if (exists) return false;
+    final newFields = fields(collection.as('new'));
+    final keys = newFields.keys().map(key -> escapeId(key));
+    final instruction = 'create virtual table ${escapeId(
+      name
+    )} using fts5(id unindexed, ${keys.join(', ')})';
+    this.db.exec(instruction);
+    return true;
+  }
+
+  function createFts5Triggers<Row: {}>(
+    collection: Collection<Row>,
+    name: String,
+    fields: (collection: Collection<Row>) -> DynamicAccess<Expression<String>>
+  ) {
+    final ctx = merge(context, {
+      formatInline: true,
+      formatAsJsonValue: false,
+      formatCursor: cursor -> throw 'assert',
+      formatField: path -> formatField(path, true)
+    });
+    final table = formatFrom(collection.cursor.from, ctx);
+    final idx = escapeId(name);
+    final newFields = fields(collection.as('new'));
+    final keys = newFields.keys().map(key -> escapeId(key));
+    final originValues = @:nullSafety(Off) [
+      for (expr in fields(collection))
+        formatExpr(expr.expr, ctx)
+    ].join(', ');
+    final newValues = @:nullSafety(Off) [
+      for (expr in newFields)
+        formatExpr(expr.expr, ctx)
+    ];
+    final setters = keys.mapi((i, key) -> {
+      return '${key}=${newValues[i]}';
+    });
+    final id = "'$.id'";
+    final instruction = '
+			create trigger ${escapeId('${name}_ai')} after insert on ${table} begin
+				insert into ${idx}(id, ${keys.join(", ")}) 
+        values (json_extract(new.data, $id), ${newValues.join(", ")});
+			end;
+			create trigger ${escapeId('${name}_ad')} after delete on ${table} begin
+				delete from ${idx} where id=json_extract(old.data, $id);
+			end;
+			create trigger ${escapeId('${name}_au')} after update on ${table} begin
+        update ${idx} set ${setters} where id=json_extract(new.data, $id);
+			end;
+			insert into ${escapeId(name)}(id, ${keys.join(", ")})
+				select ${formatExpr(collection.id.expr, ctx)}, ${originValues}
+				from ${table};
+		';
+    this.db.exec(instruction);
   }
 
   function createOnError<T>(
