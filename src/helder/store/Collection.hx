@@ -91,23 +91,8 @@ class CollectionImpl<Row:{}> extends Cursor<Row> {
 
   public function new(name: String, ?options: CollectionOptions) {
     final collections = new Map();
-    final source = 
-      if (options != null && options.alias != null) 
-        options.alias 
-      else 
-        name;
     final isFlat = options != null && options.flat;
     final cols = options != null && options.columns != null ? options.columns : [];
-    /*var select: Select<Dynamic> = Row(source);
-    if (isFlat) {
-      final fields: DynamicAccess<Select<Dynamic>> = {};
-      for (column in cols) 
-        fields.set(column, Select.Expression(Expr.Field([
-          if (options == null || options.alias == null) name else options.alias,
-            column
-        ])));
-      select = Fields(fields);
-    }*/
     final from = isFlat
       ? Table(name, cols, options != null ? options.alias : null)
       : Column(
