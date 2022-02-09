@@ -6,7 +6,7 @@ import test.db.Node.Node;
 using test.db.Node;
 
 final TestFts5 = dbSuite(test -> {
-
+  #if !sql.js
   test('Fts5', () -> {
     final store: SqliteStore = new Store();
     final Search = new Collection<{id: String, title: String, body: String}>('Search', {
@@ -36,5 +36,5 @@ final TestFts5 = dbSuite(test -> {
     assert.is(addFields.int, 123);
     assert.is(addFields.title, record1.title);
   });
-
+  #end
 });
